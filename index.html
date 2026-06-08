@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⟨ Soopor Chess ⟩</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #06060e;
+  --bg2: #0e0d1a;
+  --bg3: #16142a;
+  --surface: rgba(255,255,255,0.03);
+  --border: rgba(139,92,246,0.12);
+  --border-bright: rgba(139,92,246,0.35);
+  --violet: #8b5cf6;
+  --violet-light: #a78bfa;
+  --violet-glow: rgba(139,92,246,0.4);
+  --violet-glow2: rgba(139,92,246,0.12);
+  --cyan: #06b6d4;
+  --cyan-glow: rgba(6,182,212,0.35);
+  --pink: #ec4899;
+  --pink-glow: rgba(236,72,153,0.4);
+  --gold: #f59e0b;
+  --gold-glow: rgba(245,158,11,0.35);
+  --red: #ef4444;
+  --red-glow: rgba(239,68,68,0.4);
+  --text: #d8d6e8;
+  --text-dim: #6b6880;
+  --text-bright: #f0eef8;
+  --light-square: #232040;
+  --dark-square: #181530;
+  --select: rgba(139,92,246,0.45);
+  --last-move: rgba(6,182,212,0.18);
+  --hint-empty: rgba(139,92,246,0.35);
+  --hint-capture: rgba(236,72,153,0.5);
+  --check-color: rgba(239,68,68,0.6);
+  --radius: 6px;
+  --radius-lg: 12px;
+  --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'SF Pro Display', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139,92,246,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(6,182,212,0.05) 0%, transparent 50%),
+    var(--bg);
+}
+
+/* ═══════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════ */
+.header {
+  width: 100%;
+  text-align: center;
+  padding: 18px 16px 12px;
+  position: relative;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: min(600px, 90%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--violet-glow2), transparent);
+}
+.header h1 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 6px;
+  font-variant: small-caps;
+  background: linear-gradient(135deg, var(--violet-light) 0%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 20px var(--violet-glow2));
+}
+.header h1 .super-badge {
+  font-size: 0.55rem;
+  letter-spacing: 3px;
+  background: linear-gradient(135deg, var(--gold), var(--red));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 8px var(--gold-glow));
+  font-weight: 800;
+  vertical-align: super;
+  margin-left: 4px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.header h1 .super-badge.visible { opacity: 1; }
+
+.turn-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 5px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  transition: all var(--transition);
+}
+.turn-badge.white-turn { border-color: rgba(255,255,255,0.2); color: var(--text-bright); }
+.turn-badge.black-turn { border-color: rgba(255,255,255,0.1); }
+.turn-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  transition: all var(--transition);
+}
+.white-turn .turn-dot { background: #e0e0f0; box-shadow: 0 0 8px rgba(255,255,255,0.5); }
+.black-turn .turn-dot { background: #333; box-shadow: 0 0 4px rgba(0,0,0,0.5); }
+
+/* ═══════════════════════════════════════════
+   MAIN LAYOUT
+   ═══════════════════════════════════════════ */
+.main {
+  display: flex;
+  gap: 24px;
+  padding: 16px 24px;
+  flex: 1;
+  width: 100%;
+  max-width: 1120px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════
+   BOARD
+   ═══════════════════════════════════════════ */
+.board-container {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.board-wrapper {
+  position: relative;
+  padding-left: 22px;
+  padding-bottom: 22px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  overflow: hidden;
+  width: min(78vw, 500px);
+  aspect-ratio: 1;
+  box-shadow:
+    0 0 40px rgba(139,92,246,0.08),
+    0 0 80px rgba(0,0,0,0.4),
+    inset 0 0 60px rgba(0,0,0,0.3);
+  position: relative;
+}
+.board::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 64px, rgba(139,92,246,0.02) 64px, rgba(139,92,246,0.02) 65px),
+    repeating-linear-gradient(90deg, transparent, transparent 64px, rgba(139,92,246,0.02) 64px, rgba(139,92,246,0.02) 65px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.square {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(22px, 6vw, 42px);
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: background var(--transition), box-shadow var(--transition);
+  line-height: 1;
+  z-index: 1;
+}
+.square.light { background: var(--light-square); }
+.square.dark  { background: var(--dark-square); }
+.square::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+.square:hover { filter: brightness(1.3); }
+
+.square.selected {
+  background: var(--select) !important;
+  box-shadow: inset 0 0 16px rgba(139,92,246,0.3), inset 0 0 1px 1px var(--violet);
+}
+.square.last-move { background: var(--last-move) !important; }
+.square.check { animation: checkPulse 1s ease-in-out infinite alternate; }
+@keyframes checkPulse {
+  from { box-shadow: inset 0 0 16px var(--check-color); }
+  to   { box-shadow: inset 0 0 32px var(--check-color), inset 0 0 60px rgba(239,68,68,0.2); }
+}
+
+.square.hint-empty::before {
+  content: '';
+  position: absolute;
+  width: 26%; height: 26%;
+  border-radius: 50%;
+  background: var(--hint-empty);
+  box-shadow: 0 0 8px var(--violet-glow2);
+  pointer-events: none;
+  z-index: 2;
+}
+.square.hint-capture::before {
+  content: '';
+  position: absolute;
+  inset: 5%;
+  border-radius: 50%;
+  border: 3px solid var(--hint-capture);
+  box-shadow: 0 0 10px rgba(236,72,153,0.25);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Perk target highlight */
+.square.perk-target::after {
+  content: '';
+  position: absolute;
+  inset: 2%;
+  border: 2px dashed var(--gold);
+  border-radius: 4px;
+  box-shadow: 0 0 12px var(--gold-glow);
+  pointer-events: none;
+  z-index: 3;
+  animation: perkPulse 1.5s ease-in-out infinite;
+}
+@keyframes perkPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Scan highlight */
+.square.scan-highlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(239,68,68,0.25);
+  border: 2px solid var(--red);
+  box-shadow: 0 0 16px var(--red-glow);
+  pointer-events: none;
+  z-index: 3;
+  animation: scanPulse 0.8s ease-in-out infinite;
+}
+@keyframes scanPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.piece {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), filter var(--transition);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+.piece.white-piece { filter: drop-shadow(0 0 4px rgba(255,255,255,0.2)) drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
+.piece.black-piece { filter: drop-shadow(0 0 4px rgba(0,0,0,0.4)) drop-shadow(0 2px 4px rgba(0,0,0,0.6)); }
+.square:hover .piece { transform: scale(1.12) translateY(-2px); }
+
+/* Shielded piece */
+.piece.shielded::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  border-radius: 50%;
+  border: 2px solid var(--cyan);
+  box-shadow: 0 0 12px var(--cyan-glow);
+  animation: shieldPulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes shieldPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+/* Overclock glow */
+.piece.overclock::after {
+  content: '';
+  position: absolute;
+  inset: -15%;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 10px var(--gold-glow);
+  animation: overclockPulse 0.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes overclockPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Labels */
+.file-labels {
+  position: absolute;
+  bottom: 2px; left: 22px; right: 0;
+  display: flex;
+  justify-content: space-around;
+  padding: 4px 0;
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  letter-spacing: 1.5px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+.rank-labels {
+  position: absolute;
+  top: 0; bottom: 22px; left: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: space-around;
+  padding: 0 5px;
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* ═══════════════════════════════════════════
+   SIDE PANEL
+   ═══════════════════════════════════════════ */
+.side-panel {
+  flex: 1;
+  min-width: 200px;
+  max-width: 290px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  backdrop-filter: blur(10px);
+}
+.panel-title {
+  font-size: 0.55rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--violet-light);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(139,92,246,0.1);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.captured-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  min-height: 24px;
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+.cap-piece {
+  opacity: 0.55;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,0.4));
+  transition: opacity var(--transition);
+}
+.cap-piece:hover { opacity: 1; }
+
+.move-history {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 0.78rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  scrollbar-width: thin;
+  scrollbar-color: var(--violet) transparent;
+}
+.move-history::-webkit-scrollbar { width: 3px; }
+.move-history::-webkit-scrollbar-thumb { background: var(--violet); border-radius: 2px; }
+
+.move-row { display: flex; padding: 2px 4px; border-radius: 3px; transition: background var(--transition); }
+.move-row:hover { background: rgba(139,92,246,0.08); }
+.move-num   { color: var(--text-dim); width: 24px; flex-shrink: 0; font-size: 0.65rem; }
+.move-white { flex: 1; color: var(--text); }
+.move-black { flex: 1; color: var(--text-dim); }
+
+.controls { display: flex; gap: 6px; }
+.btn {
+  flex: 1;
+  min-width: 50px;
+  padding: 8px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg3);
+  color: var(--text);
+  font-size: 0.6rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  position: relative;
+  overflow: hidden;
+}
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(139,92,246,0.05) 100%);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.btn:hover { border-color: var(--violet); box-shadow: 0 0 14px var(--violet-glow2); }
+.btn:hover::before { opacity: 1; }
+.btn:active { transform: scale(0.96); }
+
+/* ═══════════════════════════════════════════
+   SUPER TOGGLE
+   ═══════════════════════════════════════════ */
+.super-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 16px;
+  margin-top: 4px;
+}
+.super-label {
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-family: 'SF Mono', monospace;
+  transition: color var(--transition);
+}
+.super-label.active { color: var(--gold); text-shadow: 0 0 8px var(--gold-glow); }
+
+.super-switch {
+  width: 44px;
+  height: 22px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition);
+}
+.super-switch:hover { border-color: var(--violet); }
+.super-switch.on {
+  border-color: var(--gold);
+  background: rgba(245,158,11,0.15);
+  box-shadow: 0 0 12px var(--gold-glow);
+}
+.super-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.super-switch.on::after {
+  left: 24px;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold-glow);
+}
+
+/* ═══════════════════════════════════════════
+   PERK REVEAL PANEL
+   ═══════════════════════════════════════════ */
+.perk-reveal {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 24px 16px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease, margin 0.3s ease;
+}
+.perk-reveal.open {
+  max-height: 300px;
+  opacity: 1;
+  margin-bottom: 20px;
+}
+
+.perk-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+.perk-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-glow), transparent);
+}
+
+.perk-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.perk-panel-title {
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-family: 'SF Mono', monospace;
+  text-shadow: 0 0 8px var(--gold-glow);
+}
+.perk-panel-hint {
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  font-family: 'SF Mono', monospace;
+}
+
+.perk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.perk-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 10px 8px;
+  background: var(--bg3);
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.perk-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--violet), var(--cyan));
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.perk-card:hover:not(.disabled)::before { opacity: 1; }
+.perk-card:hover:not(.disabled) {
+  border-color: var(--violet);
+  box-shadow: 0 0 16px var(--violet-glow2);
+  transform: translateY(-2px);
+}
+.perk-card.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+.perk-card.ready {
+  border-color: var(--gold);
+  box-shadow: 0 0 8px var(--gold-glow);
+}
+.perk-card.ready:hover {
+  box-shadow: 0 0 20px var(--gold-glow);
+}
+.perk-card.active-perk {
+  border-color: var(--cyan);
+  box-shadow: 0 0 16px var(--cyan-glow);
+  background: rgba(6,182,212,0.08);
+}
+
+.perk-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.perk-card-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.perk-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.perk-card-name {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-bright);
+  font-family: 'SF Mono', monospace;
+}
+.perk-card.ready .perk-card-name { color: var(--gold); }
+.perk-card-desc {
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.perk-card-charge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.perk-charge-bar {
+  flex: 1;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.perk-charge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--violet), var(--violet-light));
+  border-radius: 2px;
+  transition: width 0.4s ease, background 0.3s ease;
+  width: 0%;
+}
+.perk-card.ready .perk-charge-fill {
+  background: linear-gradient(90deg, var(--gold), #fbbf24);
+  box-shadow: 0 0 6px var(--gold-glow);
+}
+.perk-charge-text {
+  font-size: 0.5rem;
+  color: var(--text-dim);
+  font-family: 'SF Mono', monospace;
+  white-space: nowrap;
+}
+.perk-card.ready .perk-charge-text { color: var(--gold); }
+
+/* Perk tooltip */
+.perk-tooltip {
+  display: none;
+  position: fixed;
+  z-index: 300;
+  background: var(--bg2);
+  border: 1px solid var(--violet);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  max-width: 240px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+.perk-tooltip h4 { font-size: 0.7rem; color: var(--violet-light); margin-bottom: 4px; letter-spacing: 1px; }
+.perk-tooltip p { font-size: 0.62rem; color: var(--text-dim); line-height: 1.5; }
+.perk-tooltip .tt-cost { margin-top: 6px; font-size: 0.58rem; color: var(--gold); font-family: 'SF Mono', monospace; }
+
+/* ═══════════════════════════════════════════
+   MODALS
+   ═══════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+
+.modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: 0 0 60px rgba(139,92,246,0.12);
+  text-align: center;
+  animation: modalIn 0.2s ease-out;
+  max-width: 90vw;
+}
+@keyframes modalIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.modal-box h2 {
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--violet-light);
+  margin-bottom: 18px;
+  font-family: 'SF Mono', monospace;
+}
+
+.promo-choices { display: flex; gap: 10px; justify-content: center; }
+.promo-choice {
+  width: 56px; height: 56px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg3);
+  color: var(--text);
+  font-size: 1.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.promo-choice:hover {
+  border-color: var(--violet);
+  background: rgba(139,92,246,0.12);
+  box-shadow: 0 0 18px var(--violet-glow2);
+  transform: scale(1.08) translateY(-2px);
+}
+
+.gameover-box { border-color: var(--pink); box-shadow: 0 0 80px rgba(236,72,153,0.15); }
+.gameover-box h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--pink), var(--violet-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.gameover-box.stalemate h2 {
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  color: var(--text-dim);
+}
+.gameover-box p { color: var(--text-dim); margin-bottom: 20px; font-size: 0.85rem; }
+.gameover-box .btn { padding: 12px 36px; font-size: 0.8rem; border-color: var(--pink); }
+.gameover-box .btn:hover { box-shadow: 0 0 18px var(--pink-glow); border-color: var(--pink); }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 720px) {
+  .main { flex-direction: column; align-items: center; gap: 12px; padding: 10px; }
+  .side-panel { width: 100%; max-width: 480px; }
+  .board { width: 94vw; }
+  .perk-grid { grid-template-columns: 1fr 1fr; }
+  .perk-reveal { margin: 0 12px 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⟨ Soopor Chess ⟩<span class="super-badge" id="superBadge">SUPER</span></h1>
+  <div class="turn-badge white-turn" id="turnIndicator">
+    <span class="turn-dot"></span>
+    <span id="turnText">White's Turn</span>
+  </div>
+  <div class="super-toggle">
+    <span class="super-label" id="superLabel">CLASSIC</span>
+    <div class="super-switch" id="superSwitch" title="Toggle SUPER mode"></div>
+    <span class="super-label" id="superLabelR">SUPER</span>
+  </div>
+</div>
+
+<div class="main">
+  <div class="board-container">
+    <div class="board-wrapper">
+      <div class="rank-labels" id="rankLabels"></div>
+      <div class="board" id="board"></div>
+      <div class="file-labels" id="fileLabels"></div>
+    </div>
+  </div>
+
+  <div class="side-panel">
+    <div class="panel">
+      <div class="panel-title">Captured by White</div>
+      <div class="captured-row" id="capturedByWhite"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Captured by Black</div>
+      <div class="captured-row" id="capturedByBlack"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Move History</div>
+      <div class="move-history" id="moveHistory"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Controls</div>
+      <div class="controls">
+        <button class="btn" id="btnUndo">↩ Undo</button>
+        <button class="btn" id="btnNew">⟳ New</button>
+        <button class="btn" id="btnResign">⚑ Resign</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Perk Reveal Panel -->
+<div class="perk-reveal" id="perkReveal">
+  <div class="perk-panel">
+    <div class="perk-panel-header">
+      <span class="panel-title" style="margin:0;padding:0;border:none">⚡ Perks</span>
+      <span class="perk-panel-hint" id="perkHint">Earn charges by capturing and moving</span>
+    </div>
+    <div class="perk-grid" id="perkGrid"></div>
+  </div>
+</div>
+
+<!-- Perk Tooltip -->
+<div class="perk-tooltip" id="perkTooltip">
+  <h4 id="ttName"></h4>
+  <p id="ttDesc"></p>
+  <div class="tt-cost" id="ttCost"></div>
+</div>
+
+<!-- Promotion Modal -->
+<div class="modal-overlay" id="promoModal">
+  <div class="modal-box">
+    <h2>Promote Pawn</h2>
+    <div class="promo-choices" id="promoChoices"></div>
+  </div>
+</div>
+
+<!-- Game Over Overlay -->
+<div class="modal-overlay" id="gameOverOverlay">
+  <div class="modal-box gameover-box" id="gameOverBox">
+    <h2 id="gameOverTitle">Checkmate</h2>
+    <p id="gameOverMessage">White wins!</p>
+    <button class="btn" id="btnPlayAgain">Play Again</button>
+  </div>
+</div>
+
+<script type="module">
+import { ChessEngine } from './engine.js';
+
+/* ═══════════════════════════════════════════
+   PERK DEFINITIONS
+   ═══════════════════════════════════════════ */
+const PERKS = [
+  {
+    id: 'recall',
+    name: 'Recall',
+    icon: '⏪',
+    desc: 'Return one of your captured pieces to any empty home-rank square.',
+    cost: 2,
+    costType: 'captures',
+  },
+  {
+    id: 'firewall',
+    name: 'Firewall',
+    icon: '🛡',
+    desc: 'Shield one of your pieces from capture for one full turn.',
+    cost: 2,
+    costType: 'captures',
+  },
+  {
+    id: 'overclock',
+    name: 'Overclock',
+    icon: '⚡',
+    desc: 'One of your knights gets a double move this turn.',
+    cost: 3,
+    costType: 'moves',
+  },
+  {
+    id: 'glitch',
+    name: 'Glitch',
+    icon: '⇄',
+    desc: 'Swap two of your own orthogonally adjacent pieces.',
+    cost: 3,
+    costType: 'moves',
+  },
+  {
+    id: 'scan',
+    name: 'Scan',
+    icon: '👁',
+    desc: 'Reveal the opponent\'s most dangerous capture target.',
+    cost: 2,
+    costType: 'captures',
+  },
+];
+
+/* ═══════════════════════════════════════════
+   PERK SYSTEM — per-player charge tracking
+   ═══════════════════════════════════════════ */
+class PerkSystem {
+  constructor() {
+    this.whiteCaptures = 0;
+    this.blackCaptures = 0;
+    this.whiteMoves = 0;
+    this.blackMoves = 0;
+  }
+
+  onMoveMade(move, board, movingColor) {
+    const targetPiece = board[move.to[0]][move.to[1]];
+    if (movingColor === 'white') {
+      this.whiteMoves++;
+      if (targetPiece && targetPiece === targetPiece.toLowerCase()) this.whiteCaptures++;
+    } else {
+      this.blackMoves++;
+      if (targetPiece && targetPiece === targetPiece.toUpperCase()) this.blackCaptures++;
+    }
+  }
+
+  getCharges(color, perk) {
+    const total = perk.costType === 'captures'
+      ? (color === 'white' ? this.whiteCaptures : this.blackCaptures)
+      : (color === 'white' ? this.whiteMoves : this.blackMoves);
+    return Math.min(total, perk.cost);
+  }
+
+  canUse(color, perk) {
+    return this.getCharges(color, perk) >= perk.cost;
+  }
+
+  use(color, perk) {
+    if (!this.canUse(color, perk)) return false;
+    if (perk.costType === 'captures') {
+      if (color === 'white') this.whiteCaptures = 0;
+      else this.blackCaptures = 0;
+    } else {
+      if (color === 'white') this.whiteMoves = 0;
+      else this.blackMoves = 0;
+    }
+    return true;
+  }
+
+  reset() {
+    this.whiteCaptures = 0;
+    this.blackCaptures = 0;
+    this.whiteMoves = 0;
+    this.blackMoves = 0;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   GAME STATE
+   ═══════════════════════════════════════════ */
+const PIECE_CHARS = {
+  'K':'♔','Q':'♕','R':'♖','B':'♗','N':'♘','P':'♙',
+  'k':'♚','q':'♛','r':'♜','b':'♝','n':'♞','p':'♟'
+};
+const PIECE_VALUES = { p:1, n:3, b:3, r:5, q:9, k:0 };
+
+let engine = new ChessEngine();
+let selectedSquare = null;
+let legalMoves = [];
+let lastMove = null;
+let capturedByWhite = [];
+let capturedByBlack = [];
+let pendingPromo = null;
+let gameOver = false;
+let superMode = false;
+let activePerk = null;
+let perkTargets = [];
+let shieldedSquare = null;
+let scanHighlight = null;
+let scanTimeout = null;
+let overclockKnight = null;
+let glitchFirst = null;
+
+const perkSystem = new PerkSystem();
+
+/* ── DOM Refs ── */
+const boardEl = document.getElementById('board');
+const rankLabelsEl = document.getElementById('rankLabels');
+const fileLabelsEl = document.getElementById('fileLabels');
+const turnIndicatorEl = document.getElementById('turnIndicator');
+const turnTextEl = document.getElementById('turnText');
+const capturedByWhiteEl = document.getElementById('capturedByWhite');
+const capturedByBlackEl = document.getElementById('capturedByBlack');
+const moveHistoryEl = document.getElementById('moveHistory');
+const promoModal = document.getElementById('promoModal');
+const promoChoices = document.getElementById('promoChoices');
+const gameOverOverlay = document.getElementById('gameOverOverlay');
+const gameOverBox = document.getElementById('gameOverBox');
+const gameOverTitle = document.getElementById('gameOverTitle');
+const gameOverMessage = document.getElementById('gameOverMessage');
+const perkReveal = document.getElementById('perkReveal');
+const perkGrid = document.getElementById('perkGrid');
+const perkTooltip = document.getElementById('perkTooltip');
+const superSwitch = document.getElementById('superSwitch');
+const superBadge = document.getElementById('superBadge');
+const superLabel = document.getElementById('superLabel');
+const superLabelR = document.getElementById('superLabelR');
+
+/* ── Init Labels ── */
+for (let i = 8; i >= 1; i--) {
+  const span = document.createElement('span');
+  span.textContent = i;
+  rankLabelsEl.appendChild(span);
+}
+for (let c = 0; c < 8; c++) {
+  const span = document.createElement('span');
+  span.textContent = String.fromCharCode(97 + c);
+  fileLabelsEl.appendChild(span);
+}
+
+/* ── Build Board ── */
+const squareEls = [];
+for (let r = 0; r < 8; r++) {
+  squareEls[r] = [];
+  for (let c = 0; c < 8; c++) {
+    const sq = document.createElement('div');
+    sq.classList.add('square', (r + c) % 2 === 0 ? 'light' : 'dark');
+    sq.dataset.row = r;
+    sq.dataset.col = c;
+    sq.addEventListener('click', () => onSquareClick(r, c));
+    boardEl.appendChild(sq);
+    squareEls[r][c] = sq;
+  }
+}
+
+/* ── Build Perk Grid ── */
+function buildPerkGrid() {
+  perkGrid.innerHTML = '';
+  PERKS.forEach(perk => {
+    const card = document.createElement('div');
+    card.classList.add('perk-card', 'disabled');
+    card.dataset.perk = perk.id;
+    card.innerHTML = `
+      <div class="perk-card-top">
+        <span class="perk-card-icon">${perk.icon}</span>
+        <div class="perk-card-info">
+          <div class="perk-card-name">${perk.name}</div>
+          <div class="perk-card-desc">${perk.desc}</div>
+        </div>
+      </div>
+      <div class="perk-card-charge">
+        <div class="perk-charge-bar"><div class="perk-charge-fill"></div></div>
+        <span class="perk-charge-text">0/${perk.cost}</span>
+      </div>
+    `;
+    card.addEventListener('click', () => onPerkClick(perk.id));
+    card.addEventListener('mouseenter', (e) => showPerkTooltip(e, perk.id));
+    card.addEventListener('mouseleave', hidePerkTooltip);
+    perkGrid.appendChild(card);
+  });
+}
+
+function updatePerkGrid() {
+  const turn = engine.getTurn();
+  const cards = perkGrid.querySelectorAll('.perk-card');
+  cards.forEach(card => {
+    const perkId = card.dataset.perk;
+    const perk = PERKS.find(p => p.id === perkId);
+    if (!perk) return;
+
+    const charges = perkSystem.getCharges(turn, perk);
+    const ready = perkSystem.canUse(turn, perk);
+    const isActive = activePerk === perkId;
+
+    card.classList.remove('disabled', 'ready', 'active-perk');
+    if (isActive) {
+      card.classList.add('active-perk');
+    } else if (ready) {
+      card.classList.add('ready');
+    } else {
+      card.classList.add('disabled');
+    }
+
+    const fill = card.querySelector('.perk-charge-fill');
+    const text = card.querySelector('.perk-charge-text');
+    if (fill) fill.style.width = `${(charges / perk.cost) * 100}%`;
+    if (text) {
+      text.textContent = ready ? '✓ READY' : `${charges}/${perk.cost}`;
+    }
+  });
+
+  // Update hint
+  const hint = document.getElementById('perkHint');
+  if (hint) {
+    if (activePerk) {
+      const perk = PERKS.find(p => p.id === activePerk);
+      hint.textContent = `Select a target for ${perk?.name || activePerk}...`;
+      hint.style.color = 'var(--cyan)';
+    } else {
+      hint.textContent = 'Earn charges by capturing and moving';
+      hint.style.color = '';
+    }
+  }
+}
+
+function showPerkTooltip(e, perkId) {
+  const perk = PERKS.find(p => p.id === perkId);
+  if (!perk) return;
+  const turn = engine.getTurn();
+  const charges = perkSystem.getPerkState(perkId) || { current: 0 };
+  document.getElementById('ttName').textContent = `${perk.icon} ${perk.name}`;
+  document.getElementById('ttDesc').textContent = perk.desc;
+  const ready = perkSystem.canUse(turn, perk);
+  document.getElementById('ttCost').textContent = ready
+    ? '✓ READY — click to activate'
+    : `Charges: ${perkSystem.getCharges(turn, perk)}/${perk.cost} (${perk.costType})`;
+  perkTooltip.style.display = 'block';
+  perkTooltip.style.left = `${Math.min(e.clientX + 12, window.innerWidth - 260)}px`;
+  perkTooltip.style.top = `${Math.min(e.clientY - 10, window.innerHeight - 120)}px`;
+}
+
+function hidePerkTooltip() {
+  perkTooltip.style.display = 'none';
+}
+
+/* ═══════════════════════════════════════════
+   SUPER MODE TOGGLE
+   ═══════════════════════════════════════════ */
+superSwitch.addEventListener('click', () => {
+  superMode = !superMode;
+  superSwitch.classList.toggle('on', superMode);
+  superLabel.classList.toggle('active', superMode);
+  superLabelR.classList.toggle('active', superMode);
+  superBadge.classList.toggle('visible', superMode);
+  perkReveal.classList.toggle('open', superMode);
+  if (!superMode && activePerk) cancelPerk();
+  updatePerkGrid();
+});
+
+/* ═══════════════════════════════════════════
+   PERK ACTIVATION
+   ═══════════════════════════════════════════ */
+function onPerkClick(perkId) {
+  if (gameOver || pendingPromo) return;
+  if (!superMode) return;
+
+  const turn = engine.getTurn();
+  const perk = PERKS.find(p => p.id === perkId);
+  if (!perk || !perkSystem.canUse(turn, perk)) return;
+
+  const board = engine.getBoard();
+
+  switch (perkId) {
+    case 'recall': {
+      activePerk = 'recall';
+      perkTargets = [];
+      const homeRow = turn === 'white' ? 7 : 0;
+      for (let c = 0; c < 8; c++) {
+        if (!board[homeRow][c]) perkTargets.push([homeRow, c]);
+      }
+      break;
+    }
+    case 'firewall': {
+      activePerk = 'firewall';
+      perkTargets = [];
+      for (let r = 0; r < 8; r++)
+        for (let c = 0; c < 8; c++) {
+          const p = board[r][c];
+          if (p && isPieceColor(p, turn)) perkTargets.push([r, c]);
+        }
+      break;
+    }
+    case 'overclock': {
+      activePerk = 'overclock';
+      perkTargets = [];
+      const kc = turn === 'white' ? 'N' : 'n';
+      for (let r = 0; r < 8; r++)
+        for (let c = 0; c < 8; c++)
+          if (board[r][c] === kc) perkTargets.push([r, c]);
+      break;
+    }
+    case 'glitch': {
+      activePerk = 'glitch';
+      glitchFirst = null;
+      perkTargets = [];
+      for (let r = 0; r < 8; r++)
+        for (let c = 0; c < 8; c++) {
+          const p = board[r][c];
+          if (!p || !isPieceColor(p, turn)) continue;
+          for (const [dr, dc] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+            const nr = r+dr, nc = c+dc;
+            if (nr>=0 && nr<8 && nc>=0 && nc<8) {
+              const np = board[nr][nc];
+              if (np && isPieceColor(np, turn)) { perkTargets.push([r, c]); break; }
+            }
+          }
+        }
+      break;
+    }
+    case 'scan': {
+      // Instant — no target selection needed
+      perkSystem.use(turn, perk);
+      const oppColor = turn === 'white' ? 'black' : 'white';
+      const oppMoves = engine.getAllLegalMoves(oppColor);
+      const captures = oppMoves.filter(m => board[m.to[0]][m.to[1]]);
+      if (captures.length > 0) {
+        const best = captures.sort((a, b) => {
+          const va = PIECE_VALUES[board[a.to[0]][a.to[1]].toLowerCase()] || 0;
+          const vb = PIECE_VALUES[board[b.to[0]][b.to[1]].toLowerCase()] || 0;
+          return vb - va;
+        })[0];
+        scanHighlight = [...best.to];
+        if (scanTimeout) clearTimeout(scanTimeout);
+        scanTimeout = setTimeout(() => { scanHighlight = null; render(); }, 4000);
+      }
+      updatePerkGrid();
+      render();
+      return;
+    }
+  }
+
+  if (perkTargets.length === 0) {
+    activePerk = null;
+    return;
+  }
+  clearSelection();
+  updatePerkGrid();
+  render();
+}
+
+function cancelPerk() {
+  activePerk = null;
+  perkTargets = [];
+  glitchFirst = null;
+  selectedSquare = null;
+  updatePerkGrid();
+  render();
+}
+
+/* ═══════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════ */
+function render() {
+  const board = engine.getBoard();
+  const turn = engine.getTurn();
+
+  turnTextEl.textContent = turn === 'white' ? "White's Turn" : "Black's Turn";
+  turnIndicatorEl.className = `turn-badge ${turn === 'white' ? 'white-turn' : 'black-turn'}`;
+
+  let checkKingSq = null;
+  if (engine.isInCheck(turn)) {
+    const kc = turn === 'white' ? 'K' : 'k';
+    for (let r = 0; r < 8; r++)
+      for (let c = 0; c < 8; c++)
+        if (board[r][c] === kc) { checkKingSq = [r, c]; break; }
+  }
+
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const sq = squareEls[r][c];
+      const piece = board[r][c];
+
+      sq.className = 'square ' + ((r + c) % 2 === 0 ? 'light' : 'dark');
+
+      if (selectedSquare && selectedSquare[0] === r && selectedSquare[1] === c)
+        sq.classList.add('selected');
+      if (lastMove && ((lastMove.from[0] === r && lastMove.from[1] === c) || (lastMove.to[0] === r && lastMove.to[1] === c)))
+        sq.classList.add('last-move');
+      if (checkKingSq && checkKingSq[0] === r && checkKingSq[1] === c)
+        sq.classList.add('check');
+
+      // Legal move hints (only when not in perk mode)
+      if (selectedSquare && !activePerk) {
+        const mv = legalMoves.find(m => m.to[0] === r && m.to[1] === c);
+        if (mv) sq.classList.add((board[r][c] || mv.enPassant) ? 'hint-capture' : 'hint-empty');
+      }
+
+      // Perk targets
+      if (activePerk && perkTargets.some(t => t[0] === r && t[1] === c))
+        sq.classList.add('perk-target');
+
+      // Scan highlight
+      if (scanHighlight && scanHighlight[0] === r && scanHighlight[1] === c)
+        sq.classList.add('scan-highlight');
+
+      sq.innerHTML = '';
+      if (piece) {
+        const span = document.createElement('span');
+        span.classList.add('piece');
+        const isWhite = piece === piece.toUpperCase();
+        span.classList.add(isWhite ? 'white-piece' : 'black-piece');
+        if (shieldedSquare && shieldedSquare[0] === r && shieldedSquare[1] === c)
+          span.classList.add('shielded');
+        if (overclockKnight && overclockKnight[0] === r && overclockKnight[1] === c)
+          span.classList.add('overclock');
+        span.textContent = PIECE_CHARS[piece];
+        sq.appendChild(span);
+      }
+    }
+  }
+
+  renderCaptured();
+  renderMoveHistory();
+  updatePerkGrid();
+}
+
+function renderCaptured() {
+  capturedByWhiteEl.innerHTML = '';
+  capturedByBlackEl.innerHTML = '';
+  const sortFn = (a, b) => (PIECE_VALUES[b.toLowerCase()] || 0) - (PIECE_VALUES[a.toLowerCase()] || 0);
+  [...capturedByWhite].sort(sortFn).forEach(p => {
+    const span = document.createElement('span');
+    span.classList.add('cap-piece');
+    span.textContent = PIECE_CHARS[p];
+    capturedByWhiteEl.appendChild(span);
+  });
+  [...capturedByBlack].sort(sortFn).forEach(p => {
+    const span = document.createElement('span');
+    span.classList.add('cap-piece');
+    span.textContent = PIECE_CHARS[p];
+    capturedByBlackEl.appendChild(span);
+  });
+}
+
+function renderMoveHistory() {
+  const history = engine.getMoveHistory();
+  moveHistoryEl.innerHTML = '';
+  for (let i = 0; i < history.length; i += 2) {
+    const moveNum = Math.floor(i / 2) + 1;
+    const wMove = history[i];
+    const bMove = history[i + 1] || null;
+    const row = document.createElement('div');
+    row.classList.add('move-row');
+    row.innerHTML = `
+      <span class="move-num">${moveNum}.</span>
+      <span class="move-white">${toAlgebraic(wMove)}</span>
+      <span class="move-black">${bMove ? toAlgebraic(bMove) : ''}</span>
+    `;
+    moveHistoryEl.appendChild(row);
+  }
+  moveHistoryEl.scrollTop = moveHistoryEl.scrollHeight;
+}
+
+function toAlgebraic(move) {
+  if (!move) return '';
+  const from = coordToAlg(move.from[0], move.from[1]);
+  const to = coordToAlg(move.to[0], move.to[1]);
+  if (move.castling === 'K' || move.castling === 'k') return 'O-O';
+  if (move.castling === 'Q' || move.castling === 'q') return 'O-O-O';
+  return from + '→' + to + (move.promotionPiece ? '=' + move.promotionPiece.toUpperCase() : '');
+}
+function coordToAlg(r, c) { return String.fromCharCode(97 + c) + (8 - r); }
+
+/* ═══════════════════════════════════════════
+   CLICK HANDLER
+   ═══════════════════════════════════════════ */
+function onSquareClick(row, col) {
+  if (gameOver || pendingPromo) return;
+  const board = engine.getBoard();
+  const piece = board[row][col];
+  const turn = engine.getTurn();
+
+  // ── Perk activation mode ──
+  if (activePerk) {
+    const target = perkTargets.find(t => t[0] === row && t[1] === col);
+    if (!target) { cancelPerk(); return; }
+
+    switch (activePerk) {
+      case 'recall': {
+        const myCaptured = turn === 'white' ? capturedByBlack : capturedByWhite;
+        if (myCaptured.length === 0) { cancelPerk(); return; }
+        const best = myCaptured.sort((a, b) =>
+          (PIECE_VALUES[b.toLowerCase()]||0) - (PIECE_VALUES[a.toLowerCase()]||0)
+        )[0];
+        const restorePiece = turn === 'white' ? best.toUpperCase() : best.toLowerCase();
+        board[row][col] = restorePiece;
+        const idx = myCaptured.indexOf(best);
+        if (idx >= 0) myCaptured.splice(idx, 1);
+        perkSystem.use(turn, PERKS.find(p => p.id === 'recall'));
+        break;
+      }
+      case 'firewall': {
+        shieldedSquare = [row, col];
+        perkSystem.use(turn, PERKS.find(p => p.id === 'firewall'));
+        break;
+      }
+      case 'overclock': {
+        overclockKnight = [row, col];
+        perkSystem.use(turn, PERKS.find(p => p.id === 'overclock'));
+        break;
+      }
+      case 'glitch': {
+        if (!glitchFirst) {
+          glitchFirst = [row, col];
+          // Show adjacent own pieces as second targets
+          perkTargets = [];
+          for (const [dr, dc] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+            const nr = row+dr, nc = col+dc;
+            if (nr>=0 && nr<8 && nc>=0 && nc<8) {
+              const np = board[nr][nc];
+              if (np && isPieceColor(np, turn)) perkTargets.push([nr, nc]);
+            }
+          }
+          if (perkTargets.length === 0) { cancelPerk(); return; }
+          render();
+          return;
+        } else {
+          // Swap
+          const temp = board[glitchFirst[0]][glitchFirst[1]];
+          board[glitchFirst[0]][glitchFirst[1]] = board[row][col];
+          board[row][col] = temp;
+          perkSystem.use(turn, PERKS.find(p => p.id === 'glitch'));
+        }
+        break;
+      }
+    }
+
+    activePerk = null;
+    perkTargets = [];
+    glitchFirst = null;
+    selectedSquare = null;
+    render();
+    return;
+  }
+
+  // ── Normal move flow ──
+  if (selectedSquare) {
+    const moveMatch = legalMoves.find(m => m.to[0] === row && m.to[1] === col);
+    if (moveMatch) {
+      // Shielded piece can't be captured
+      if (shieldedSquare && shieldedSquare[0] === row && shieldedSquare[1] === col && moveMatch.capture) {
+        clearSelection(); render(); return;
+      }
+      if (moveMatch.promotionPiece) {
+        pendingPromo = { from: [...selectedSquare], to: [row, col] };
+        showPromotionModal(turn);
+        return;
+      }
+      executeMove({ from: [...selectedSquare], to: [row, col] });
+
+      // Overclock: auto-select the knight for second move
+      if (overclockKnight && overclockKnight[0] === selectedSquare[0] && overclockKnight[1] === selectedSquare[1]) {
+        overclockKnight = null;
+        selectedSquare = [row, col];
+        legalMoves = engine.getLegalMoves(row, col);
+        render();
+        return;
+      }
+      return;
+    }
+
+    if (selectedSquare[0] === row && selectedSquare[1] === col) {
+      clearSelection(); return;
+    }
+    if (piece && isPieceColor(piece, turn)) {
+      selectSquare(row, col); return;
+    }
+    clearSelection(); return;
+  }
+
+  if (piece && isPieceColor(piece, turn)) {
+    selectSquare(row, col);
+  }
+}
+
+function selectSquare(row, col) {
+  selectedSquare = [row, col];
+  legalMoves = engine.getLegalMoves(row, col);
+  render();
+}
+
+function clearSelection() {
+  selectedSquare = null;
+  legalMoves = [];
+  render();
+}
+
+function isPieceColor(piece, color) {
+  if (!piece) return false;
+  return color === 'white' ? piece === piece.toUpperCase() : piece === piece.toLowerCase();
+}
+
+/* ═══════════════════════════════════════════
+   EXECUTE MOVE
+   ═══════════════════════════════════════════ */
+function executeMove(move) {
+  const board = engine.getBoard();
+  const targetPiece = board[move.to[0]][move.to[1]];
+  const movingPiece = board[move.from[0]][move.from[1]];
+  const movingColor = movingPiece === movingPiece.toUpperCase() ? 'white' : 'black';
+
+  // Shielded piece can't be captured
+  if (shieldedSquare && shieldedSquare[0] === move.to[0] && shieldedSquare[1] === move.to[1] && targetPiece) {
+    clearSelection(); render(); return;
+  }
+
+  // Track captures
+  if (targetPiece) {
+    if (movingColor === 'white') capturedByWhite.push(targetPiece);
+    else capturedByBlack.push(targetPiece);
+    if (shieldedSquare && shieldedSquare[0] === move.to[0] && shieldedSquare[1] === move.to[1])
+      shieldedSquare = null;
+  }
+
+  // En passant capture tracking
+  if (movingPiece.toLowerCase() === 'p' && !targetPiece && move.from[1] !== move.to[1]) {
+    const capturedPawn = board[move.from[0]][move.to[1]];
+    if (capturedPawn) {
+      if (movingColor === 'white') capturedByWhite.push(capturedPawn);
+      else capturedByBlack.push(capturedPawn);
+    }
+  }
+
+  const success = engine.makeMove(move);
+  if (!success) { clearSelection(); return; }
+
+  // Update perk charges with correct board state
+  perkSystem.onMoveMade(move, board, movingColor);
+
+  // Clear shield after opponent's turn completes
+  if (movingColor !== engine.getTurn()) {
+    shieldedSquare = null;
+  }
+
+  lastMove = { from: [...move.from], to: [...move.to] };
+  clearSelection();
+
+  // Check game over
+  const nextTurn = engine.getTurn();
+  if (engine.isCheckmate(nextTurn)) {
+    gameOver = true;
+    showGameOver('checkmate', nextTurn === 'white' ? 'Black' : 'White');
+  } else if (engine.isStalemate(nextTurn)) {
+    gameOver = true;
+    showGameOver('stalemate', null);
+  }
+
+  render();
+}
+
+/* ═══════════════════════════════════════════
+   PROMOTION
+   ═══════════════════════════════════════════ */
+function showPromotionModal(turn) {
+  promoChoices.innerHTML = '';
+  const pieces = ['Q', 'R', 'B', 'N'];
+  pieces.forEach(p => {
+    const btn = document.createElement('button');
+    btn.classList.add('promo-choice');
+    btn.textContent = PIECE_CHARS[turn === 'white' ? p : p.toLowerCase()];
+    btn.title = p;
+    btn.addEventListener('click', () => {
+      promoModal.classList.remove('active');
+      executeMove({ from: [...pendingPromo.from], to: [...pendingPromo.to], promotionPiece: p });
+      pendingPromo = null;
+    });
+    promoChoices.appendChild(btn);
+  });
+  promoModal.classList.add('active');
+}
+
+/* ═══════════════════════════════════════════
+   GAME OVER
+   ═══════════════════════════════════════════ */
+function showGameOver(type, winner) {
+  gameOverBox.className = 'modal-box gameover-box' + (type === 'stalemate' ? ' stalemate' : '');
+  if (type === 'checkmate') {
+    gameOverTitle.textContent = 'Checkmate';
+    gameOverMessage.textContent = winner + ' wins!';
+  } else {
+    gameOverTitle.textContent = 'Stalemate';
+    gameOverMessage.textContent = 'The game is a draw.';
+  }
+  gameOverOverlay.classList.add('active');
+}
+
+/* ═══════════════════════════════════════════
+   CONTROLS
+   ═══════════════════════════════════════════ */
+document.getElementById('btnUndo').addEventListener('click', () => {
+  if (engine.getMoveHistory().length === 0) return;
+  engine.undo();
+  rebuildCapturedAfterUndo();
+  const newHistory = engine.getMoveHistory();
+  if (newHistory.length > 0) {
+    const prev = newHistory[newHistory.length - 1];
+    lastMove = { from: [...prev.from], to: [...prev.to] };
+  } else {
+    lastMove = null;
+  }
+  gameOver = false;
+  gameOverOverlay.classList.remove('active');
+  shieldedSquare = null;
+  overclockKnight = null;
+  activePerk = null;
+  perkTargets = [];
+  glitchFirst = null;
+  perkSystem.reset();
+  clearSelection();
+  render();
+});
+
+document.getElementById('btnNew').addEventListener('click', newGame);
+document.getElementById('btnResign').addEventListener('click', () => {
+  if (gameOver) return;
+  gameOver = true;
+  showGameOver('checkmate', engine.getTurn() === 'white' ? 'Black' : 'White');
+});
+document.getElementById('btnPlayAgain').addEventListener('click', newGame);
+
+function newGame() {
+  engine = new ChessEngine();
+  selectedSquare = null;
+  legalMoves = [];
+  lastMove = null;
+  capturedByWhite = [];
+  capturedByBlack = [];
+  pendingPromo = null;
+  gameOver = false;
+  activePerk = null;
+  perkTargets = [];
+  shieldedSquare = null;
+  overclockKnight = null;
+  glitchFirst = null;
+  scanHighlight = null;
+  if (scanTimeout) clearTimeout(scanTimeout);
+  perkSystem.reset();
+  gameOverOverlay.classList.remove('active');
+  promoModal.classList.remove('active');
+  render();
+}
+
+function rebuildCapturedAfterUndo() {
+  const moveHistory = engine.getMoveHistory();
+  const tempEngine = new ChessEngine();
+  capturedByWhite = [];
+  capturedByBlack = [];
+  for (const move of moveHistory) {
+    const board = tempEngine.getBoard();
+    const targetPiece = board[move.to[0]][move.to[1]];
+    const movingPiece = board[move.from[0]][move.from[1]];
+    const movingColor = movingPiece === movingPiece.toUpperCase() ? 'white' : 'black';
+    if (targetPiece) {
+      if (movingColor === 'white') capturedByWhite.push(targetPiece);
+      else capturedByBlack.push(targetPiece);
+    }
+    if (movingPiece.toLowerCase() === 'p' && !targetPiece && move.from[1] !== move.to[1]) {
+      const capturedPawn = board[move.from[0]][move.to[1]];
+      if (capturedPawn) {
+        if (movingColor === 'white') capturedByWhite.push(capturedPawn);
+        else capturedByBlack.push(capturedPawn);
+      }
+    }
+    tempEngine.makeMove(move);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   KEYBOARD
+   ═══════════════════════════════════════════ */
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.key === 'z') { e.preventDefault(); document.getElementById('btnUndo').click(); }
+  if (e.ctrlKey && e.key === 'n') { e.preventDefault(); newGame(); }
+  if (e.key === 'Escape') {
+    if (pendingPromo) { pendingPromo = null; promoModal.classList.remove('active'); clearSelection(); }
+    else if (activePerk) { cancelPerk(); }
+    else { clearSelection(); }
+  }
+});
+
+/* ── Init ── */
+buildPerkGrid();
+render();
+</script>
+</body>
+</html>
