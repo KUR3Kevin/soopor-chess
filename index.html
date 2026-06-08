@@ -499,9 +499,10 @@ body {
   transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease, margin 0.3s ease;
 }
 .perk-reveal.open {
-  max-height: 300px;
+  max-height: none;
   opacity: 1;
   margin-bottom: 20px;
+  overflow: visible;
 }
 
 .perk-panel {
@@ -759,6 +760,12 @@ body {
   .board { width: 94vw; }
   .perk-grid { grid-template-columns: 1fr 1fr; }
   .perk-reveal { margin: 0 12px 12px; }
+  .perk-panel { padding: 10px 10px; }
+  .perk-card { padding: 8px 8px 6px; }
+}
+@media (max-width: 400px) {
+  .perk-grid { grid-template-columns: 1fr; }
+  .perk-reveal { margin: 0 8px 8px; }
 }
 </style>
 </head>
