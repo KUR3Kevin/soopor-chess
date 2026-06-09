@@ -935,8 +935,8 @@ class PerkSystem {
     this.blackMoves = 0;
   }
 
-  onMoveMade(move, board, movingColor) {
-    const targetPiece = board[move.to[0]][move.to[1]];
+  onMoveMade(move, boardBeforeMove, movingColor) {
+    const targetPiece = boardBeforeMove[move.to[0]][move.to[1]];
     if (movingColor === 'white') {
       this.whiteMoves++;
       if (targetPiece && targetPiece === targetPiece.toLowerCase()) this.whiteCaptures++;
@@ -1459,13 +1459,16 @@ function onSquareClick(row, col) {
         showPromotionModal(turn);
         return;
       }
-      executeMove({ from: [...selectedSquare], to: [row, col] });
+      const sourceSquare = [...selectedSquare];
+      executeMove({ from: sourceSquare, to: [row, col] });
 
-      // Overclock: auto-select the knight for second move
-      if (overclockKnight && overclockKnight[0] === selectedSquare[0] && overclockKnight[1] === selectedSquare[1]) {
+      // Overclock: allow the same knight to move twice this turn.
+      if (overclockKnight && overclockKnight[0] === sourceSquare[0] && overclockKnight[1] === sourceSquare[1]) {
         overclockKnight = null;
         selectedSquare = [row, col];
         legalMoves = engine.getLegalMoves(row, col);
+        activePerk = null;
+        perkTargets = [];
         render();
         return;
       }
