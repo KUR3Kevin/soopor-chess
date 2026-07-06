@@ -998,6 +998,7 @@ let superMode = false;
 let activePerk = null;
 let perkTargets = [];
 let shieldedSquare = null;
+let shieldOwner = null; // color that applied the Firewall shield
 let scanHighlight = null;
 let scanTimeout = null;
 let overclockKnight = null;
@@ -1129,7 +1130,6 @@ function showPerkTooltip(e, perkId) {
   const perk = PERKS.find(p => p.id === perkId);
   if (!perk) return;
   const turn = engine.getTurn();
-  const charges = perkSystem.getPerkState(perkId) || { current: 0 };
   document.getElementById('ttName').textContent = `${perk.icon} ${perk.name}`;
   document.getElementById('ttDesc').textContent = perk.desc;
   const ready = perkSystem.canUse(turn, perk);
@@ -1224,7 +1224,7 @@ function onPerkClick(perkId) {
       // Instant — no target selection needed
       perkSystem.use(turn, perk);
       const oppColor = turn === 'white' ? 'black' : 'white';
-      const oppMoves = engine.getAllLegalMoves(oppColor);
+      const oppMoves = engine.getAllLegalMovesForColor(oppColor);
       const captures = oppMoves.filter(m => board[m.to[0]][m.to[1]]);
       if (captures.length > 0) {
         const best = captures.sort((a, b) => {
@@ -1396,7 +1396,7 @@ function onSquareClick(row, col) {
           (PIECE_VALUES[b.toLowerCase()]||0) - (PIECE_VALUES[a.toLowerCase()]||0)
         )[0];
         const restorePiece = turn === 'white' ? best.toUpperCase() : best.toLowerCase();
-        board[row][col] = restorePiece;
+        engine.setSquare(row, col, restorePiece);
         const idx = myCaptured.indexOf(best);
         if (idx >= 0) myCaptured.splice(idx, 1);
         perkSystem.use(turn, PERKS.find(p => p.id === 'recall'));
@@ -1404,6 +1404,7 @@ function onSquareClick(row, col) {
       }
       case 'firewall': {
         shieldedSquare = [row, col];
+        shieldOwner = turn;
         perkSystem.use(turn, PERKS.find(p => p.id === 'firewall'));
         break;
       }
@@ -1430,8 +1431,8 @@ function onSquareClick(row, col) {
         } else {
           // Swap
           const temp = board[glitchFirst[0]][glitchFirst[1]];
-          board[glitchFirst[0]][glitchFirst[1]] = board[row][col];
-          board[row][col] = temp;
+          engine.setSquare(glitchFirst[0], glitchFirst[1], board[row][col]);
+          engine.setSquare(row, col, temp);
           perkSystem.use(turn, PERKS.find(p => p.id === 'glitch'));
         }
         break;
@@ -1460,13 +1461,17 @@ function onSquareClick(row, col) {
         return;
       }
       const sourceSquare = [...selectedSquare];
+      const isOverclockedMove = overclockKnight && overclockKnight[0] === sourceSquare[0] && overclockKnight[1] === sourceSquare[1];
       executeMove({ from: sourceSquare, to: [row, col] });
 
       // Overclock: allow the same knight to move twice this turn.
-      if (overclockKnight && overclockKnight[0] === sourceSquare[0] && overclockKnight[1] === sourceSquare[1]) {
+      if (isOverclockedMove) {
         overclockKnight = null;
-        selectedSquare = [row, col];
-        legalMoves = engine.getLegalMoves(row, col);
+        if (!gameOver) {
+          engine.setTurn(turn); // give the mover back their turn for the bonus move
+          selectedSquare = [row, col];
+          legalMoves = engine.getLegalMoves(row, col);
+        }
         activePerk = null;
         perkTargets = [];
         render();
@@ -1543,9 +1548,10 @@ function executeMove(move) {
   // Update perk charges with correct board state
   perkSystem.onMoveMade(move, board, movingColor);
 
-  // Clear shield after opponent's turn completes
-  if (movingColor !== engine.getTurn()) {
+  // Clear shield once the shield owner's opponent has completed their move
+  if (shieldedSquare && movingColor !== shieldOwner) {
     shieldedSquare = null;
+    shieldOwner = null;
   }
 
   lastMove = { from: [...move.from], to: [...move.to] };
@@ -1617,6 +1623,7 @@ document.getElementById('btnUndo').addEventListener('click', () => {
   gameOver = false;
   gameOverOverlay.classList.remove('active');
   shieldedSquare = null;
+  shieldOwner = null;
   overclockKnight = null;
   activePerk = null;
   perkTargets = [];
@@ -1646,6 +1653,7 @@ function newGame() {
   activePerk = null;
   perkTargets = [];
   shieldedSquare = null;
+  shieldOwner = null;
   overclockKnight = null;
   glitchFirst = null;
   scanHighlight = null;

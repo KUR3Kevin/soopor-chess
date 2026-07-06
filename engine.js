@@ -99,7 +99,7 @@ class ChessEngine {
     if (move.promotionPiece) {
       // Validate promotion piece
       const upper = move.promotionPiece.toUpperCase();
-      if (!['Q', 'R', 'B', 'N'].includes(upper)) {
+      if (['Q', 'R', 'B', 'N'].includes(upper)) {
         promotionPiece = upper;
       }
     }
@@ -163,6 +163,46 @@ class ChessEngine {
   /** Return whose turn it is: 'white' or 'black'. */
   getTurn() {
     return this._turn;
+  }
+
+  /**
+   * Directly place (or clear, with null) a piece on a square, bypassing move
+   * legality and turn checks. For special non-standard effects only (e.g.
+   * a game-mode "perk" that repositions a piece outside the normal move flow).
+   */
+  setSquare(row, col, piece) {
+    if (!this._inBounds(row, col)) return;
+    this._board[row][col] = piece || null;
+  }
+
+  /**
+   * Force whose turn it is. For special non-standard effects only (e.g. a
+   * "perk" that grants an extra move); does not validate the transition.
+   */
+  setTurn(color) {
+    if (color === 'white' || color === 'black') this._turn = color;
+  }
+
+  /**
+   * Return all legal moves for the given color regardless of whose turn it
+   * currently is. Unlike getAllLegalMoves(), this does not require the color
+   * to match the active turn — useful for "what if" threat queries that must
+   * not mutate game state.
+   */
+  getAllLegalMovesForColor(color) {
+    const originalTurn = this._turn;
+    this._turn = color;
+    const moves = [];
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const p = this._board[r][c];
+        if (p && this._pieceColor(p) === color) {
+          moves.push(...this.getLegalMoves(r, c));
+        }
+      }
+    }
+    this._turn = originalTurn;
+    return moves;
   }
 
   /** Return an array of all moves made so far. */
