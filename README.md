@@ -1,27 +1,26 @@
-# Soopor Chess — Netlify Deploy
+# Soopor Chess
 
-## Deploy via Netlify CLI
+> Chess with optional perks, in a red / white / mellow-orange theme
 
+## Concept
+A chess implementation with non-standard rules through 6 unique one-time-use abilities ("perks") that change gameplay strategy:
+
+- **Pawn Sprint**: Advance pawn 4 squares on first move
+- **Double Turn**: Take two moves per turn (excluding king/queen)
+- **Pawn Recall**: Recapture piece when pawn promotes
+- **Firewall**: Shield piece from capture for one turn
+- **Scan**: Highlight opponent's attack squares
+- **Triple Advance**: Setup phase only — before your first regular move, send one pawn three squares forward
+
+## PvC Difficulty
+Beginner (random/1-ply), Pro (3-ply minimax), and Expert (4+ ply with tactical extensions and cross-game memory).
+
+## Improvements Needed
+- [ ] Implement sound effects for check/move/perks
+- [ ] Add 3D piece animations when capturing
+
+## Getting Started
 ```bash
-cd ~/Documents/Projects/chess-game
-netlify deploy --prod
+python3 -m http.server 8090
+cd ~/Documents/Projects/chess-game && open http://localhost:8090
 ```
-
-## Or deploy via Git
-
-1. Push to GitHub
-2. Connect repo to Netlify
-3. Set publish directory to root (`.`)
-4. No build command needed (static site)
-
-## Files
-
-- `index.html` — main game UI (imports engine.js as ES module)
-- `engine.js` — chess engine (CommonJS + ES module export)
-- `netlify.toml` — Netlify config (headers, caching)
-
-## Requirements
-
-- Both files must be in the same directory
-- Server must serve `.js` files with `application/javascript` MIME type (Netlify does this by default)
-- No external dependencies — fully self-contained

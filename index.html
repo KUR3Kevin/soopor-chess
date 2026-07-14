@@ -8,36 +8,41 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #06060e;
-  --bg2: #0e0d1a;
-  --bg3: #16142a;
-  --surface: rgba(255,255,255,0.03);
-  --border: rgba(139,92,246,0.12);
-  --border-bright: rgba(139,92,246,0.35);
-  --violet: #8b5cf6;
-  --violet-light: #a78bfa;
-  --violet-glow: rgba(139,92,246,0.4);
-  --violet-glow2: rgba(139,92,246,0.12);
-  --cyan: #06b6d4;
-  --cyan-glow: rgba(6,182,212,0.35);
-  --pink: #ec4899;
-  --pink-glow: rgba(236,72,153,0.4);
-  --gold: #f59e0b;
-  --gold-glow: rgba(245,158,11,0.35);
-  --red: #ef4444;
-  --red-glow: rgba(239,68,68,0.4);
-  --text: #d8d6e8;
-  --text-dim: #6b6880;
-  --text-bright: #f0eef8;
-  --light-square: #232040;
-  --dark-square: #181530;
-  --select: rgba(139,92,246,0.45);
-  --last-move: rgba(6,182,212,0.18);
-  --hint-empty: rgba(139,92,246,0.35);
-  --hint-capture: rgba(236,72,153,0.5);
-  --check-color: rgba(239,68,68,0.6);
-  --radius: 6px;
-  --radius-lg: 12px;
+  /* ── Red / White / Mellow-Orange palette ── */
+  --bg: #FFF8F0;
+  --bg2: #FFFFFF;
+  --bg3: #FBE4CF;
+  --surface: rgba(255,255,255,0.6);
+  --border: rgba(120,55,38,0.16);
+  --border-bright: rgba(226,115,61,0.45);
+  --violet: #E2733D;          /* primary accent — mellow orange */
+  --violet-rgb: 226,115,61;
+  --violet-light: #EE9563;    /* lighter mellow orange */
+  --violet-glow: rgba(226,115,61,0.28);
+  --violet-glow2: rgba(226,115,61,0.10);
+  --cyan: #A63A2E;            /* secondary — deep red */
+  --cyan-rgb: 166,58,46;
+  --cyan-glow: rgba(166,58,46,0.30);
+  --pink: #C94E42;            /* tertiary — warm coral red */
+  --pink-rgb: 201,78,66;
+  --pink-glow: rgba(201,78,66,0.30);
+  --gold: #D98A42;            /* mellow amber-orange */
+  --gold-rgb: 217,138,66;
+  --gold-glow: rgba(217,138,66,0.32);
+  --red: #C0392B;
+  --red-glow: rgba(192,57,43,0.30);
+  --text: #3D362E;
+  --text-dim: #8C8273;
+  --text-bright: #211D18;
+  --light-square: #FDF3E6;
+  --dark-square: #E2A468;
+  --select: rgba(226,115,61,0.40);
+  --last-move: rgba(166,58,46,0.28);
+  --hint-empty: rgba(226,115,61,0.45);
+  --hint-capture: rgba(201,78,66,0.55);
+  --check-color: rgba(192,57,43,0.55);
+  --radius: 10px;
+  --radius-lg: 16px;
   --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
 }
 
@@ -56,8 +61,8 @@ body {
   align-items: center;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139,92,246,0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(6,182,212,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(var(--violet-rgb),0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(var(--cyan-rgb),0.05) 0%, transparent 50%),
     var(--bg);
 }
 
@@ -103,6 +108,130 @@ body {
   transition: opacity 0.3s;
 }
 .header h1 .super-badge.visible { opacity: 1; }
+
+.title-banner {
+  width: 100%;
+  max-width: 1120px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px 6px;
+}
+.game-title {
+  font-size: 1.35rem;
+  letter-spacing: 5px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--violet-light), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.subtitle {
+  margin-top: 4px;
+  font-size: 0.62rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+.brand { display: flex; flex-direction: column; align-items: flex-start; }
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 5px 0 2px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--violet), var(--red));
+  box-shadow: 0 2px 10px var(--violet-glow2);
+}
+.brand-king { font-size: 1.05rem; line-height: 1; color: #FFF8F0; text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+.brand-letters {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #FFF8F0;
+}
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text-bright);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-weight: 700;
+}
+.icon-btn:hover { border-color: var(--violet); box-shadow: 0 0 12px var(--violet-glow2); }
+.icon-btn.active { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 12px var(--gold-glow); }
+
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(10px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.help-overlay.open { display: flex; }
+.help-drawer {
+  width: min(760px, 100%);
+  max-height: min(82vh, 760px);
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(var(--violet-rgb),0.28);
+  background: linear-gradient(180deg, rgba(13,13,21,0.98), rgba(8,8,14,0.98));
+  box-shadow: 0 30px 90px rgba(0,0,0,0.45);
+  padding: 16px;
+}
+.help-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.help-subtitle {
+  margin-top: 4px;
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  font-family: 'SF Mono', monospace;
+  letter-spacing: 1.5px;
+}
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+}
+.help-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.03);
+  padding: 12px;
+}
+.help-card h4 {
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--violet-light);
+  margin-bottom: 8px;
+}
+.help-card p, .help-card li {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+.help-card ul { padding-left: 18px; display: grid; gap: 6px; }
 
 .turn-badge {
   display: inline-flex;
@@ -170,7 +299,7 @@ body {
   width: min(78vw, 500px);
   aspect-ratio: 1;
   box-shadow:
-    0 0 40px rgba(139,92,246,0.08),
+    0 0 40px rgba(var(--violet-rgb),0.08),
     0 0 80px rgba(0,0,0,0.4),
     inset 0 0 60px rgba(0,0,0,0.3);
   position: relative;
@@ -180,8 +309,8 @@ body {
   position: absolute;
   inset: 0;
   background:
-    repeating-linear-gradient(0deg, transparent, transparent 64px, rgba(139,92,246,0.02) 64px, rgba(139,92,246,0.02) 65px),
-    repeating-linear-gradient(90deg, transparent, transparent 64px, rgba(139,92,246,0.02) 64px, rgba(139,92,246,0.02) 65px);
+    repeating-linear-gradient(0deg, transparent, transparent 64px, rgba(var(--violet-rgb),0.02) 64px, rgba(var(--violet-rgb),0.02) 65px),
+    repeating-linear-gradient(90deg, transparent, transparent 64px, rgba(var(--violet-rgb),0.02) 64px, rgba(var(--violet-rgb),0.02) 65px);
   pointer-events: none;
   z-index: 0;
 }
@@ -212,7 +341,7 @@ body {
 
 .square.selected {
   background: var(--select) !important;
-  box-shadow: inset 0 0 16px rgba(139,92,246,0.3), inset 0 0 1px 1px var(--violet);
+  box-shadow: inset 0 0 16px rgba(var(--violet-rgb),0.3), inset 0 0 1px 1px var(--violet);
 }
 .square.last-move { background: var(--last-move) !important; }
 .square.check { animation: checkPulse 1s ease-in-out infinite alternate; }
@@ -237,7 +366,7 @@ body {
   inset: 5%;
   border-radius: 50%;
   border: 3px solid var(--hint-capture);
-  box-shadow: 0 0 10px rgba(236,72,153,0.25);
+  box-shadow: 0 0 10px rgba(var(--pink-rgb),0.25);
   pointer-events: none;
   z-index: 2;
 }
@@ -334,7 +463,9 @@ body {
   position: absolute;
   top: 0; bottom: 22px; left: 0;
   display: flex;
-  flex-direction: column-reverse;
+  /* Board renders engine row 0 (rank 8) at the top; labels are appended 8→1,
+     so a plain column keeps them aligned. column-reverse double-flipped them. */
+  flex-direction: column;
   justify-content: space-around;
   padding: 0 5px;
   font-size: 0.55rem;
@@ -368,7 +499,7 @@ body {
   color: var(--violet-light);
   margin-bottom: 8px;
   padding-bottom: 6px;
-  border-bottom: 1px solid rgba(139,92,246,0.1);
+  border-bottom: 1px solid rgba(var(--violet-rgb),0.1);
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
@@ -399,7 +530,7 @@ body {
 .move-history::-webkit-scrollbar-thumb { background: var(--violet); border-radius: 2px; }
 
 .move-row { display: flex; padding: 2px 4px; border-radius: 3px; transition: background var(--transition); }
-.move-row:hover { background: rgba(139,92,246,0.08); }
+.move-row:hover { background: rgba(var(--violet-rgb),0.08); }
 .move-num   { color: var(--text-dim); width: 24px; flex-shrink: 0; font-size: 0.65rem; }
 .move-white { flex: 1; color: var(--text); }
 .move-black { flex: 1; color: var(--text-dim); }
@@ -427,7 +558,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, transparent 0%, rgba(139,92,246,0.05) 100%);
+  background: linear-gradient(135deg, transparent 0%, rgba(var(--violet-rgb),0.05) 100%);
   opacity: 0;
   transition: opacity var(--transition);
 }
@@ -469,7 +600,7 @@ body {
 .super-switch:hover { border-color: var(--violet); }
 .super-switch.on {
   border-color: var(--gold);
-  background: rgba(245,158,11,0.15);
+  background: rgba(var(--gold-rgb),0.15);
   box-shadow: 0 0 12px var(--gold-glow);
 }
 .super-switch::after {
@@ -485,6 +616,66 @@ body {
   left: 24px;
   background: var(--gold);
   box-shadow: 0 0 8px var(--gold-glow);
+}
+
+/* ═══════════════════════════════════════════
+   CPU DIFFICULTY SELECTOR
+   ═══════════════════════════════════════════ */
+.difficulty-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 4px 16px 2px;
+}
+.difficulty-bar[hidden] { display: none; }
+.diff-prefix {
+  font-size: 0.55rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-family: 'SF Mono', monospace;
+}
+.diff-seg {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg3);
+  padding: 2px;
+  gap: 2px;
+}
+.diff-btn {
+  padding: 5px 14px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.6rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: 'SF Mono', monospace;
+}
+.diff-btn:hover { color: var(--text-bright); }
+.diff-btn.active {
+  background: rgba(var(--violet-rgb),0.18);
+  color: var(--violet-light);
+  box-shadow: 0 0 10px var(--violet-glow2);
+}
+.diff-btn[data-diff="expert"].active {
+  background: rgba(var(--gold-rgb),0.16);
+  color: var(--gold);
+  box-shadow: 0 0 10px var(--gold-glow);
+}
+.diff-hint {
+  width: 100%;
+  text-align: center;
+  font-size: 0.55rem;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  font-family: 'SF Mono', monospace;
 }
 
 /* ═══════════════════════════════════════════
@@ -517,7 +708,7 @@ body.super-mode .perk-reveal.open {
 
 .perk-panel {
   background: linear-gradient(180deg, rgba(18,18,30,0.98), rgba(12,12,18,0.98));
-  border: 1px solid rgba(139,92,246,0.24);
+  border: 1px solid rgba(var(--violet-rgb),0.24);
   border-radius: var(--radius-lg);
   padding: 14px 16px;
   backdrop-filter: blur(12px);
@@ -601,7 +792,7 @@ body.super-mode .perk-reveal.open {
 .perk-card.active-perk {
   border-color: var(--cyan);
   box-shadow: 0 0 16px var(--cyan-glow);
-  background: rgba(6,182,212,0.08);
+  background: rgba(var(--cyan-rgb),0.08);
 }
 
 .perk-card-top {
@@ -702,7 +893,7 @@ body.super-mode .perk-reveal.open {
   border: 1px solid var(--border-bright);
   border-radius: var(--radius-lg);
   padding: 28px;
-  box-shadow: 0 0 60px rgba(139,92,246,0.12);
+  box-shadow: 0 0 60px rgba(var(--violet-rgb),0.12);
   text-align: center;
   animation: modalIn 0.2s ease-out;
   max-width: 90vw;
@@ -736,12 +927,12 @@ body.super-mode .perk-reveal.open {
 }
 .promo-choice:hover {
   border-color: var(--violet);
-  background: rgba(139,92,246,0.12);
+  background: rgba(var(--violet-rgb),0.12);
   box-shadow: 0 0 18px var(--violet-glow2);
   transform: scale(1.08) translateY(-2px);
 }
 
-.gameover-box { border-color: var(--pink); box-shadow: 0 0 80px rgba(236,72,153,0.15); }
+.gameover-box { border-color: var(--pink); box-shadow: 0 0 80px rgba(var(--pink-rgb),0.15); }
 .gameover-box h2 {
   font-size: 1.5rem;
   font-weight: 700;
@@ -766,6 +957,9 @@ body.super-mode .perk-reveal.open {
    RESPONSIVE
    ═══════════════════════════════════════════ */
 @media (max-width: 720px) {
+  .title-banner { padding: 12px 12px 6px; align-items: flex-start; }
+  .game-title { font-size: 1.05rem; letter-spacing: 3px; }
+  .subtitle { letter-spacing: 1px; }
   .main { flex-direction: column; align-items: center; gap: 12px; padding: 10px; }
   .side-panel { width: 100%; max-width: 480px; }
   .board { width: 94vw; }
@@ -773,30 +967,227 @@ body.super-mode .perk-reveal.open {
   .perk-reveal { margin: 0 12px 12px; }
   .perk-panel { padding: 10px 10px; }
   .perk-card { padding: 8px 8px 6px; }
+  .help-drawer { width: 100%; max-height: 88vh; padding: 12px; }
+  .help-grid { grid-template-columns: 1fr; }
+  .help-overlay { padding: 10px; }
   .perk-reveal.open {
     position: sticky;
     bottom: 10px;
     z-index: 60;
-    box-shadow: 0 0 0 1px rgba(139,92,246,0.35) inset, 0 -10px 50px rgba(0,0,0,0.5);
+    box-shadow: 0 0 0 1px rgba(var(--violet-rgb),0.35) inset, 0 -10px 50px rgba(0,0,0,0.5);
   }
   body.super-mode .main { padding-bottom: 0; }
   body.super-mode .board-container { transform: scale(0.985); transform-origin: top center; }
-  body.super-mode .perk-panel { border-color: rgba(245,158,11,0.45); }
+  body.super-mode .perk-panel { border-color: rgba(var(--gold-rgb),0.45); }
 }
 @media (max-width: 400px) {
+  .title-banner { gap: 8px; }
+  .top-actions { gap: 6px; }
   .perk-grid { grid-template-columns: 1fr; }
   .perk-reveal { margin: 0 8px 8px; }
   .perk-panel-header { flex-direction: column; align-items: flex-start; gap: 4px; }
   .perk-panel { padding: 10px 8px; }
 }
 
+/* ═══════════════════════════════════════════
+   TUTORIAL SYSTEM
+   ═══════════════════════════════════════════ */
+/* Board highlights driven by the coach */
+.square.tutor-from { box-shadow: inset 0 0 0 3px var(--cyan); animation: tutorPulse 1.3s ease-in-out infinite; }
+.square.tutor-to { box-shadow: inset 0 0 0 3px var(--gold); animation: tutorPulse 1.3s ease-in-out infinite; }
+.square.tutor-good { box-shadow: inset 0 0 0 3px var(--violet-light); }
+@keyframes tutorPulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.5); } }
+
+/* First-load welcome modal reuses .modal-overlay; custom box */
+.welcome-box { max-width: 460px; text-align: center; }
+.welcome-box h2 { margin-bottom: 6px; }
+.welcome-box .welcome-sub { color: var(--text-dim); font-size: 0.92rem; margin-bottom: 18px; line-height: 1.5; }
+.welcome-actions { display: flex; flex-direction: column; gap: 10px; }
+.welcome-actions .btn { width: 100%; justify-content: center; padding: 12px; font-size: 0.95rem; }
+.btn.btn-primary { background: linear-gradient(135deg, var(--violet), var(--cyan)); color: #fff; border-color: transparent; }
+.btn.btn-ghost { background: transparent; color: var(--text-dim); }
+
+/* Coach overlay — floating instructional panel */
+.coach { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(140%);
+  width: min(560px, calc(100vw - 24px)); z-index: 1200; opacity: 0; pointer-events: none;
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), opacity .25s; }
+.coach.open { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+.coach-inner { background: linear-gradient(160deg, rgba(22,20,42,0.98), rgba(14,13,26,0.98));
+  border: 1px solid var(--border-bright); border-radius: var(--radius-lg);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(var(--violet-rgb),0.08);
+  padding: 16px 18px; backdrop-filter: blur(8px); }
+.coach-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.coach-badge { font-size: 0.66rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
+  color: var(--cyan); background: rgba(var(--cyan-rgb),0.12); border: 1px solid var(--cyan-glow);
+  padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+.coach-title { font-size: 1.02rem; font-weight: 700; color: var(--text-bright); flex: 1; }
+.coach-progress { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; }
+.coach-body { font-size: 0.9rem; line-height: 1.55; color: var(--text); }
+.coach-body b { color: var(--violet-light); }
+.coach-body .piece-glyph { font-size: 1.3rem; vertical-align: -2px; }
+.coach-status { font-size: 0.82rem; margin-top: 8px; min-height: 1.1em; font-weight: 600; }
+.coach-status.good { color: var(--cyan); }
+.coach-status.bad { color: var(--gold); }
+.coach-actions { display: flex; gap: 8px; margin-top: 14px; align-items: center; }
+.coach-actions .spacer { flex: 1; }
+.coach .btn { padding: 8px 14px; font-size: 0.85rem; }
+.coach-track-grid { display: flex; flex-direction: column; gap: 10px; }
+
+/* Win celebration flourish */
+.coach.celebrate .coach-inner { border-color: var(--gold); box-shadow: 0 0 40px var(--gold-glow), 0 12px 40px rgba(0,0,0,0.55); }
+
+@media (max-width: 640px) {
+  .coach { bottom: 8px; width: calc(100vw - 16px); }
+  .coach-inner { padding: 13px 14px; }
+  .coach-body { font-size: 0.85rem; }
+  .coach-top { flex-wrap: wrap; }
+}
+
+/* ═══════════════════════════════════════════
+   CLAUDE DESIGN RESKIN — overrides layer
+   Warm ivory + clay, frosted glass, glossy board.
+   ═══════════════════════════════════════════ */
+html, body {
+  font-family: 'Styrene B', ui-sans-serif, -apple-system, 'Segoe UI', system-ui, sans-serif;
+  color: var(--text);
+}
+body {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -12%, rgba(var(--violet-rgb),0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 85% 112%, rgba(var(--cyan-rgb),0.09) 0%, transparent 55%),
+    var(--bg);
+}
+
+/* Serif display voice (Tiempos-like) */
+.game-title, .modal-box h2, .gameover-box h2, .welcome-box h2,
+.coach-title, .help-head .panel-title {
+  font-family: 'Tiempos Headline', 'Iowan Old Style', 'Palatino Linotype', Georgia, ui-serif, serif;
+  text-transform: none;
+  font-variant: normal;
+}
+.game-title {
+  letter-spacing: 0.3px;
+  font-weight: 600;
+  background: linear-gradient(120deg, var(--violet) 0%, var(--violet-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: none;
+}
+.modal-box h2, .welcome-box h2 { color: var(--text-bright); letter-spacing: 0.3px; }
+.subtitle { font-family: inherit; color: var(--text-dim); letter-spacing: 1.6px; }
+
+/* Quiet the techy mono labels (keep mono only for move notation) */
+.panel-title, .diff-prefix, .diff-btn, .diff-hint, .super-label,
+.perk-panel-title, .perk-panel-hint, .perk-card-name, .perk-charge-text,
+.coach-badge, .help-card h4, .help-subtitle, .perk-tooltip h4 {
+  font-family: inherit;
+}
+.panel-title { color: var(--violet); border-bottom-color: rgba(var(--violet-rgb),0.16); }
+.help-card h4, .perk-tooltip h4 { color: var(--violet); }
+.move-history { font-family: 'SF Mono', ui-monospace, 'Cascadia Code', monospace; }
+
+/* Soft rounded chrome */
+.icon-btn {
+  background: var(--bg2);
+  border-color: var(--border);
+  color: var(--text-bright);
+  box-shadow: 0 1px 2px rgba(60,45,30,0.07);
+}
+.icon-btn:hover { border-color: var(--violet); box-shadow: 0 2px 12px var(--violet-glow2); }
+.icon-btn.active { color: var(--violet); border-color: var(--violet); box-shadow: 0 2px 12px var(--violet-glow2); }
+
+/* Frosted glass surfaces */
+.panel, .perk-panel, .help-drawer, .perk-tooltip, .coach-inner {
+  background: rgba(255,255,255,0.55);
+  border-color: var(--border);
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  box-shadow: 0 10px 34px rgba(60,45,30,0.12), inset 0 1px 0 rgba(255,255,255,0.65);
+}
+.perk-panel::before { background: linear-gradient(90deg, transparent, var(--violet-glow), transparent); }
+.coach-inner { background: rgba(251,249,244,0.9); }
+.modal-overlay { background: rgba(40,32,24,0.42); backdrop-filter: blur(8px); }
+.help-overlay { background: rgba(40,32,24,0.5); }
+.modal-box {
+  background: rgba(251,249,244,0.94);
+  border-color: var(--border-bright);
+  box-shadow: 0 24px 70px rgba(60,42,28,0.28), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+/* Glossy-glass board */
+.board {
+  border: 1px solid var(--border-bright);
+  background: #E7B27E;
+  box-shadow:
+    0 20px 54px rgba(60,42,28,0.26),
+    0 0 0 9px rgba(255,255,255,0.4),
+    0 0 0 10px rgba(var(--violet-rgb),0.16),
+    inset 0 2px 0 rgba(255,255,255,0.5);
+}
+.board::before { background: none; }
+.square.light {
+  background:
+    linear-gradient(158deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 46%),
+    var(--light-square);
+}
+.square.dark {
+  background:
+    linear-gradient(158deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0) 46%),
+    var(--dark-square);
+}
+.square::after { background: linear-gradient(155deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 40%); }
+.square:hover { filter: brightness(1.05); }
+.square.selected { box-shadow: inset 0 0 0 3px var(--violet), inset 0 0 18px rgba(var(--violet-rgb),0.28); }
+
+/* Pieces — solid, glossy, high-contrast on cream */
+.piece { text-shadow: 0 1px 1px rgba(40,30,20,0.22); }
+.piece.white-piece {
+  color: #FCFAF4;
+  -webkit-text-stroke: 1.1px #5B4F41;
+  filter: drop-shadow(0 2px 2px rgba(40,30,20,0.30)) drop-shadow(0 0 1px rgba(0,0,0,0.25));
+}
+.piece.black-piece {
+  color: #2B2620;
+  -webkit-text-stroke: 0.9px #F7EEE1;
+  filter: drop-shadow(0 2px 2px rgba(40,30,20,0.28));
+}
+.cap-piece { opacity: 0.78; }
+.cap-piece.white-piece { -webkit-text-stroke-width: 0.6px; }
+.cap-piece.black-piece { -webkit-text-stroke-width: 0.3px; }
+
+/* Buttons + controls — warm */
+.btn { background: var(--bg2); border-color: var(--border); color: var(--text); box-shadow: 0 1px 2px rgba(60,45,30,0.07); }
+.btn:hover { border-color: var(--violet); box-shadow: 0 2px 12px var(--violet-glow2); }
+.diff-seg, .super-switch, .perk-card { background: var(--bg2); }
+.promo-choice { background: var(--bg2); border-color: var(--border); }
+.promo-choice.white-piece, .promo-choice.black-piece { -webkit-text-stroke: 0; }
+.promo-choice.white-piece { color: #FCFAF4; text-shadow: 0 0 1px #5B4F41, 0 1px 2px rgba(0,0,0,0.3); }
+.promo-choice.black-piece { color: #2B2620; }
+.perk-charge-bar { background: rgba(61,51,40,0.12); }
+.move-row:hover { background: rgba(var(--violet-rgb),0.08); }
+
+/* Turn dot legibility on cream */
+.white-turn .turn-dot { background: #FBF9F4; box-shadow: 0 0 0 1px rgba(60,45,30,0.35); }
+.black-turn .turn-dot { background: #2B2620; box-shadow: 0 0 0 1px rgba(60,45,30,0.2); }
+
 </style>
 </head>
 <body>
-
-<div class="header">
-  <h1>⟨ Soopor Chess ⟩<span class="super-badge" id="superBadge">SUPER</span></h1>
-  <div class="turn-badge white-turn" id="turnIndicator">
+<div class="title-banner">
+    <div class="brand">
+      <div class="game-title">Soopor Chess</div>
+      <div class="brand-mark" aria-hidden="true">
+        <span class="brand-king">♔</span><span class="brand-letters">SC</span>
+      </div>
+      <div class="subtitle">super chess with optional powers</div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="btnTutorial" title="Learn to play">🎓</button>
+      <button class="icon-btn" id="btnHelp" title="Help / info">?</button>
+      <button class="icon-btn" id="btnMode" title="Switch PvP / PvC">PVP</button>
+    </div>
+  </div>
+  <div class="turn-badge" id="turnIndicator">
     <span class="turn-dot"></span>
     <span id="turnText">White's Turn</span>
   </div>
@@ -804,6 +1195,51 @@ body.super-mode .perk-reveal.open {
     <span class="super-label" id="superLabel">CLASSIC</span>
     <div class="super-switch" id="superSwitch" title="Toggle SUPER mode"></div>
     <span class="super-label" id="superLabelR">SUPER</span>
+  </div>
+  <div class="difficulty-bar" id="difficultyBar" hidden>
+    <span class="diff-prefix">CPU LEVEL</span>
+    <div class="diff-seg">
+      <button class="diff-btn active" data-diff="beginner">Beginner</button>
+      <button class="diff-btn" data-diff="pro">Pro</button>
+      <button class="diff-btn" data-diff="expert">Expert</button>
+    </div>
+    <span class="diff-hint" id="difficultyHint">Casual play — beatable with basic strategy</span>
+  </div>
+
+<!-- Help Drawer -->
+<div class="help-overlay" id="helpOverlay" aria-hidden="true">
+  <div class="help-drawer" id="helpDrawer">
+    <div class="help-head">
+      <div>
+        <div class="panel-title" style="margin:0;padding:0;border:none">Help / Info</div>
+        <div class="help-subtitle">Classic, Super, PvP, PvC, and perks</div>
+      </div>
+      <button class="icon-btn" id="btnHelpClose" title="Close help">×</button>
+    </div>
+    <div class="help-grid">
+      <section class="help-card">
+        <h4>Game Modes</h4>
+        <p><b>Classic</b> is standard chess. <b>Super</b> reveals the perk system.</p>
+        <p><b>PvP</b> is player-vs-player. <b>PvC</b> lets you play against the computer.</p>
+      </section>
+      <section class="help-card">
+        <h4>Perks</h4>
+        <ul>
+          <li><b>Pawn Sprint</b> — once per game, a pawn may move four squares on its first move if the path is clear.</li>
+          <li><b>Double Turn</b> — take two moves in one go, using any two pieces except the king and queen.</li>
+          <li><b>Pawn Recall</b> — when a pawn reaches the far side, spawn a pawn in the middle and bring back one captured piece.</li>
+          <li><b>Triple Advance</b> — setup phase only: before your first regular move, send one pawn three squares forward.</li>
+        </ul>
+      </section>
+      <section class="help-card">
+        <h4>How they work</h4>
+        <p>Each perk is a one-time rule per side. Once used, it stays spent for the rest of the game.</p>
+      </section>
+      <section class="help-card">
+        <h4>Phone Tips</h4>
+        <p>On small screens, the board stacks above the side rail. Open SUPER to slide the perk drawer into view.</p>
+      </section>
+    </div>
   </div>
 </div>
 
@@ -875,52 +1311,92 @@ body.super-mode .perk-reveal.open {
   </div>
 </div>
 
-<script type="module">
-import { ChessEngine } from './engine.js';
+<!-- Welcome Modal (first load) -->
+<div class="modal-overlay" id="welcomeOverlay">
+  <div class="modal-box welcome-box">
+    <h2>⟨ Welcome to Soopor Chess ⟩</h2>
+    <p class="welcome-sub">New to chess? No problem. Pick a guided tutorial and you'll learn every piece,
+      then win your very first game. Already a pro? Jump straight in.</p>
+    <div class="welcome-actions">
+      <button class="btn btn-primary" id="btnLearnRegular">♟ Learn Regular Chess</button>
+      <button class="btn btn-primary" id="btnLearnSoopor">⚡ Learn Soopor Chess</button>
+      <button class="btn btn-ghost" id="btnSkipTutorial">No thanks, just let me play</button>
+    </div>
+  </div>
+</div>
+
+<!-- Coach Overlay -->
+<div class="coach" id="coach" aria-live="polite">
+  <div class="coach-inner">
+    <div class="coach-top">
+      <span class="coach-badge" id="coachBadge">Tutorial</span>
+      <span class="coach-title" id="coachTitle">Title</span>
+      <span class="coach-progress" id="coachProgress"></span>
+    </div>
+    <div class="coach-body" id="coachBody">Body</div>
+    <div class="coach-status" id="coachStatus"></div>
+    <div class="coach-actions" id="coachActions"></div>
+  </div>
+</div>
+
+<script src="./engine.js?v=2"></script>
+<script>
+// engine.js is a classic script whose top-level `class ChessEngine` already
+// creates a global binding. Re-declaring it here with `const` collided in the
+// shared global lexical scope, throwing a parse-time SyntaxError that silently
+// aborted this entire script (board never built). Use the global class directly.
 
 /* ═══════════════════════════════════════════
    PERK DEFINITIONS
    ═══════════════════════════════════════════ */
 const PERKS = [
   {
-    id: 'recall',
-    name: 'Recall',
-    icon: '⏪',
-    desc: 'Return one of your captured pieces to any empty home-rank square.',
-    cost: 2,
-    costType: 'captures',
+    id: 'pawn-sprint',
+    name: 'Pawn Sprint',
+    icon: '♟',
+    desc: 'Once per game, a pawn may advance four squares on its very first move if the path is clear.',
+    cost: 1,
+    costType: 'start',
+  },
+  {
+    id: 'double-turn',
+    name: 'Double Turn',
+    icon: '⚡',
+    desc: 'Take two moves in one turn. You may move any two pieces except the king and queen.',
+    cost: 1,
+    costType: 'start',
+  },
+  {
+    id: 'pawn-recall',
+    name: 'Pawn Recall',
+    icon: '⤴',
+    desc: 'When a pawn reaches the far side, spawn a pawn in the middle and bring back one captured piece.',
+    cost: 1,
+    costType: 'start',
   },
   {
     id: 'firewall',
     name: 'Firewall',
     icon: '🛡',
-    desc: 'Shield one of your pieces from capture for one full turn.',
-    cost: 2,
-    costType: 'captures',
-  },
-  {
-    id: 'overclock',
-    name: 'Overclock',
-    icon: '⚡',
-    desc: 'One of your knights gets a double move this turn.',
-    cost: 3,
-    costType: 'moves',
-  },
-  {
-    id: 'glitch',
-    name: 'Glitch',
-    icon: '⇄',
-    desc: 'Swap two of your own orthogonally adjacent pieces.',
-    cost: 3,
-    costType: 'moves',
+    desc: 'Shield one piece so it cannot be captured until after the opponent finishes their next turn.',
+    cost: 1,
+    costType: 'start',
   },
   {
     id: 'scan',
     name: 'Scan',
-    icon: '👁',
-    desc: 'Reveal the opponent\'s most dangerous capture target.',
-    cost: 2,
-    costType: 'captures',
+    icon: '◎',
+    desc: 'Highlight every square the opponent can capture on with their current legal moves.',
+    cost: 1,
+    costType: 'start',
+  },
+  {
+    id: 'triple-advance',
+    name: 'Triple Advance',
+    icon: '⏫',
+    desc: 'Setup phase only: before your first regular move this game, advance one pawn three squares forward.',
+    cost: 1,
+    costType: 'setup',
   },
 ];
 
@@ -929,59 +1405,60 @@ const PERKS = [
    ═══════════════════════════════════════════ */
 class PerkSystem {
   constructor() {
-    this.whiteCaptures = 0;
-    this.blackCaptures = 0;
-    this.whiteMoves = 0;
-    this.blackMoves = 0;
+    this.white = { pawnSprint: false, doubleTurn: false, pawnRecall: false, firewall: false, scan: false, tripleAdvance: false };
+    this.black = { pawnSprint: false, doubleTurn: false, pawnRecall: false, firewall: false, scan: false, tripleAdvance: false };
+    this.doubleTurnActive = { white: false, black: false };
   }
 
-  onMoveMade(move, boardBeforeMove, movingColor) {
-    const targetPiece = boardBeforeMove[move.to[0]][move.to[1]];
-    if (movingColor === 'white') {
-      this.whiteMoves++;
-      if (targetPiece && targetPiece === targetPiece.toLowerCase()) this.whiteCaptures++;
-    } else {
-      this.blackMoves++;
-      if (targetPiece && targetPiece === targetPiece.toUpperCase()) this.blackCaptures++;
-    }
-  }
-
-  getCharges(color, perk) {
-    const total = perk.costType === 'captures'
-      ? (color === 'white' ? this.whiteCaptures : this.blackCaptures)
-      : (color === 'white' ? this.whiteMoves : this.blackMoves);
-    return Math.min(total, perk.cost);
+  state(color) {
+    return color === 'white' ? this.white : this.black;
   }
 
   canUse(color, perk) {
-    return this.getCharges(color, perk) >= perk.cost;
+    return !this.state(color)[perk.id.replace(/-/g, '')];
+  }
+
+  getCharges(color, perk) {
+    return this.canUse(color, perk) ? perk.cost : 0;
   }
 
   use(color, perk) {
-    if (!this.canUse(color, perk)) return false;
-    if (perk.costType === 'captures') {
-      if (color === 'white') this.whiteCaptures = 0;
-      else this.blackCaptures = 0;
-    } else {
-      if (color === 'white') this.whiteMoves = 0;
-      else this.blackMoves = 0;
-    }
+    const key = perk.id.replace(/-/g, '');
+    if (this.state(color)[key]) return false;
+    this.state(color)[key] = true;
+    if (perk.id === 'double-turn') this.doubleTurnActive[color] = true;
     return true;
   }
 
+  onMoveMade() {
+    // Perk state is handled by explicit rules in the UI.
+  }
+
+  consumeDoubleTurn(color) {
+    const active = this.doubleTurnActive[color];
+    this.doubleTurnActive[color] = false;
+    return active;
+  }
+
+  hasDoubleTurn(color) {
+    return !!this.doubleTurnActive[color];
+  }
+
   reset() {
-    this.whiteCaptures = 0;
-    this.blackCaptures = 0;
-    this.whiteMoves = 0;
-    this.blackMoves = 0;
+    this.white = { pawnSprint: false, doubleTurn: false, pawnRecall: false, firewall: false, scan: false, tripleAdvance: false };
+    this.black = { pawnSprint: false, doubleTurn: false, pawnRecall: false, firewall: false, scan: false, tripleAdvance: false };
+    this.doubleTurnActive = { white: false, black: false };
   }
 }
 
 /* ═══════════════════════════════════════════
    GAME STATE
    ═══════════════════════════════════════════ */
+// Use the filled glyph set for BOTH sides; colour distinguishes them.
+// This keeps white pieces solid + outlined (readable on the cream board)
+// instead of hollow outline glyphs that vanish on a light theme.
 const PIECE_CHARS = {
-  'K':'♔','Q':'♕','R':'♖','B':'♗','N':'♘','P':'♙',
+  'K':'♚','Q':'♛','R':'♜','B':'♝','N':'♞','P':'♟',
   'k':'♚','q':'♛','r':'♜','b':'♝','n':'♞','p':'♟'
 };
 const PIECE_VALUES = { p:1, n:3, b:3, r:5, q:9, k:0 };
@@ -998,10 +1475,21 @@ let superMode = false;
 let activePerk = null;
 let perkTargets = [];
 let shieldedSquare = null;
+let shieldExpirePly = 0;
 let scanHighlight = null;
 let scanTimeout = null;
+let doubleTurnState = null;
+let recallArmed = false;
+let sprintArmed = false;
+let tripleAdvanceArmed = false;
 let overclockKnight = null;
 let glitchFirst = null;
+let recallSpawnPending = null;
+let doubleTurnCurrentPiece = null;
+let doubleTurnSelectedPiece = null;
+let doubleTurnFirstMove = null;
+let doubleTurnSecondSelection = null;
+let doubleTurnColor = null;
 
 const perkSystem = new PerkSystem();
 
@@ -1024,9 +1512,445 @@ const perkReveal = document.getElementById('perkReveal');
 const perkGrid = document.getElementById('perkGrid');
 const perkTooltip = document.getElementById('perkTooltip');
 const superSwitch = document.getElementById('superSwitch');
-const superBadge = document.getElementById('superBadge');
 const superLabel = document.getElementById('superLabel');
 const superLabelR = document.getElementById('superLabelR');
+const btnHelp = document.getElementById('btnHelp');
+const btnHelpClose = document.getElementById('btnHelpClose');
+const helpOverlay = document.getElementById('helpOverlay');
+const helpDrawer = document.getElementById('helpDrawer');
+const btnMode = document.getElementById('btnMode');
+
+let playMode = 'pvp';
+let helpOpen = false;
+let computerColor = 'black';
+let computerBusy = false;
+let computerMoveTimer = null;
+let difficulty = 'beginner';
+// Positions/moves the Expert CPU got checkmated after, so it won't repeat them.
+let expertTrail = [];
+
+const difficultyBar = document.getElementById('difficultyBar');
+const difficultyHint = document.getElementById('difficultyHint');
+
+function syncModeUI() {
+  btnMode.textContent = playMode === 'pvc' ? 'CPU' : 'PVP';
+  btnMode.classList.toggle('active', playMode === 'pvc');
+  if (difficultyBar) difficultyBar.hidden = playMode !== 'pvc';
+  if (playMode === 'pvc') syncDifficultyUI();
+}
+
+function syncDifficultyUI() {
+  if (!difficultyBar) return;
+  difficultyBar.querySelectorAll('.diff-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.diff === difficulty);
+  });
+  if (difficultyHint) {
+    if (difficulty === 'expert') {
+      const mem = ExpertMemory.load();
+      const games = mem.gamesSeen || 0;
+      difficultyHint.textContent = games
+        ? `Expert has studied ${games} of your game${games === 1 ? '' : 's'}`
+        : 'Expert will learn your style as you play';
+    } else if (difficulty === 'pro') {
+      difficultyHint.textContent = 'Solid and tactical — punishes mistakes';
+    } else {
+      difficultyHint.textContent = 'Casual play — beatable with basic strategy';
+    }
+  }
+}
+
+function openHelp() {
+  helpOpen = true;
+  helpOverlay.classList.add('open');
+  helpOverlay.setAttribute('aria-hidden', 'false');
+  btnHelp.classList.add('active');
+}
+
+function closeHelp() {
+  helpOpen = false;
+  helpOverlay.classList.remove('open');
+  helpOverlay.setAttribute('aria-hidden', 'true');
+  btnHelp.classList.remove('active');
+}
+
+function currentColorIsComputerTurn() {
+  return playMode === 'pvc' && engine.getTurn() === computerColor;
+}
+
+function scheduleComputerMove() {
+  if (playMode !== 'pvc' || !currentColorIsComputerTurn() || gameOver || pendingPromo || computerBusy) return;
+  window.clearTimeout(computerMoveTimer);
+  computerMoveTimer = window.setTimeout(makeComputerMove, 280);
+}
+
+function makeComputerMove() {
+  if (playMode !== 'pvc' || gameOver || pendingPromo || computerBusy) return;
+  if (engine.getTurn() !== computerColor) return;
+  computerBusy = true;
+  try {
+    const move = ChessAI.pickMove(engine, computerColor, difficulty);
+    if (!move) return; // no legal moves; checkmate/stalemate handled elsewhere
+    // Remember the position + move so Expert can learn from a loss this game.
+    if (difficulty === 'expert') {
+      expertTrail.push({ pos: ExpertMemory.posKey(engine), move: ExpertMemory.moveKey(move) });
+      if (expertTrail.length > 12) expertTrail.shift();
+    }
+    executeMove(move);
+  } finally {
+    computerBusy = false;
+  }
+}
+
+let expertGameRecorded = false;
+
+// Update Expert's persistent memory exactly once when a CPU-expert game ends.
+function finalizeExpertGame(computerLost) {
+  if (playMode !== 'pvc' || difficulty !== 'expert' || expertGameRecorded) return;
+  expertGameRecorded = true;
+  ExpertMemory.recordGameSeen();
+  if (computerLost && expertTrail.length) ExpertMemory.recordLoss(expertTrail);
+  syncDifficultyUI();
+}
+
+/* ═══════════════════════════════════════════
+   CHESS AI — negamax + alpha-beta search
+   Three difficulty profiles share one search; they differ in depth,
+   evaluation richness, randomness, and (for Expert) game-to-game memory.
+   ═══════════════════════════════════════════ */
+const ChessAI = (() => {
+  const VALUE = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
+  const MATE = 1000000;
+
+  // Piece-square tables from White's view, indexed [row][col] with row 0 = rank 8.
+  // Black reuses them vertically mirrored (row -> 7 - row).
+  const PST = {
+    p: [
+      [0,0,0,0,0,0,0,0],[50,50,50,50,50,50,50,50],[10,10,20,30,30,20,10,10],
+      [5,5,10,25,25,10,5,5],[0,0,0,20,20,0,0,0],[5,-5,-10,0,0,-10,-5,5],
+      [5,10,10,-20,-20,10,10,5],[0,0,0,0,0,0,0,0]
+    ],
+    n: [
+      [-50,-40,-30,-30,-30,-30,-40,-50],[-40,-20,0,0,0,0,-20,-40],
+      [-30,0,10,15,15,10,0,-30],[-30,5,15,20,20,15,5,-30],
+      [-30,0,15,20,20,15,0,-30],[-30,5,10,15,15,10,5,-30],
+      [-40,-20,0,5,5,0,-20,-40],[-50,-40,-30,-30,-30,-30,-40,-50]
+    ],
+    b: [
+      [-20,-10,-10,-10,-10,-10,-10,-20],[-10,0,0,0,0,0,0,-10],
+      [-10,0,5,10,10,5,0,-10],[-10,5,5,10,10,5,5,-10],
+      [-10,0,10,10,10,10,0,-10],[-10,10,10,10,10,10,10,-10],
+      [-10,5,0,0,0,0,5,-10],[-20,-10,-10,-10,-10,-10,-10,-20]
+    ],
+    r: [
+      [0,0,0,0,0,0,0,0],[5,10,10,10,10,10,10,5],[-5,0,0,0,0,0,0,-5],
+      [-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],
+      [-5,0,0,0,0,0,0,-5],[0,0,0,5,5,0,0,0]
+    ],
+    q: [
+      [-20,-10,-10,-5,-5,-10,-10,-20],[-10,0,0,0,0,0,0,-10],
+      [-10,0,5,5,5,5,0,-10],[-5,0,5,5,5,5,0,-5],[0,0,5,5,5,5,0,-5],
+      [-10,5,5,5,5,5,0,-10],[-10,0,5,0,0,0,0,-10],[-20,-10,-10,-5,-5,-10,-10,-20]
+    ],
+    k: [
+      [-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],
+      [-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],
+      [-20,-30,-30,-40,-40,-30,-30,-20],[-10,-20,-20,-20,-20,-20,-20,-10],
+      [20,20,0,0,0,0,20,20],[20,30,10,0,0,10,30,20]
+    ],
+  };
+
+  const CONFIG = {
+    beginner: { maxDepth: 1, timeMs: 60,  usePST: false },
+    pro:      { maxDepth: 3, timeMs: 350, usePST: true },
+    expert:   { maxDepth: 4, timeMs: 1000, usePST: true, extend: true, memory: true },
+  };
+
+  let deadline = 0;
+
+  // Static evaluation from White's absolute perspective (+ = good for White).
+  function evaluateBoard(board, usePST) {
+    let score = 0;
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const p = board[r][c];
+        if (!p) continue;
+        const isWhite = p === p.toUpperCase();
+        const t = p.toLowerCase();
+        let v = VALUE[t];
+        if (usePST) v += isWhite ? PST[t][r][c] : PST[t][7 - r][c];
+        score += isWhite ? v : -v;
+      }
+    }
+    return score;
+  }
+
+  function evalForSide(eng, color, usePST) {
+    const s = evaluateBoard(eng.getBoard(), usePST);
+    return color === 'white' ? s : -s;
+  }
+
+  // MVV-LVA ordering: try the most promising captures/promotions first so
+  // alpha-beta prunes harder.
+  function orderMoves(eng, moves) {
+    const board = eng.getBoard();
+    for (const m of moves) {
+      const victim = board[m.to[0]][m.to[1]];
+      const attacker = board[m.from[0]][m.from[1]];
+      let s = 0;
+      if (victim) s += 10 * VALUE[victim.toLowerCase()] - VALUE[attacker.toLowerCase()];
+      if (m.promotionPiece) s += VALUE[m.promotionPiece.toLowerCase()];
+      m._order = s;
+    }
+    moves.sort((a, b) => b._order - a._order);
+  }
+
+  function negamax(eng, depth, ply, alpha, beta, cfg) {
+    if (performance.now() > deadline) return evalForSide(eng, eng.getTurn(), cfg.usePST);
+    const color = eng.getTurn();
+    const moves = eng.getAllLegalMoves(color);
+    if (!moves.length) {
+      if (eng.isInCheck(color)) return -(MATE - ply); // checkmated; prefer slower mates
+      return 0; // stalemate
+    }
+    if (depth <= 0) return evalForSide(eng, color, cfg.usePST);
+    orderMoves(eng, moves);
+    let best = -Infinity;
+    for (const m of moves) {
+      eng.forceMove(m);
+      // Expert extends the search one ply when a move gives check, to see
+      // through forcing tactical sequences.
+      const ext = (cfg.extend && eng.isInCheck(eng.getTurn()) && ply < 8) ? 1 : 0;
+      const score = -negamax(eng, depth - 1 + ext, ply + 1, -beta, -alpha, cfg);
+      eng.undo();
+      if (score > best) best = score;
+      if (best > alpha) alpha = best;
+      if (alpha >= beta) break;
+    }
+    return best;
+  }
+
+  function stripOrder(m) {
+    if (!m) return m;
+    const { _order, ...clean } = m;
+    return clean;
+  }
+
+  function randomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  // Beginner: ~35% pure blunder, otherwise a noisy 1-ply material grab.
+  function pickBeginner(eng, color) {
+    const root = eng.clone();
+    const moves = root.getAllLegalMoves(color);
+    if (!moves.length) return null;
+    if (Math.random() < 0.35) return stripOrder(randomChoice(moves));
+    let best = null, bestScore = -Infinity;
+    for (const m of moves) {
+      root.forceMove(m);
+      let s = -evalForSide(root, root.getTurn(), false); // material only
+      root.undo();
+      s += (Math.random() * 2 - 1) * 80; // ~0.8 pawn of noise → human-like sloppiness
+      if (s > bestScore) { bestScore = s; best = m; }
+    }
+    return stripOrder(best);
+  }
+
+  // Iterative deepening; only commit a depth's result if that depth completed
+  // within the time budget, so a cut-off deep search never returns a half-move.
+  function searchRoot(eng, color, cfg) {
+    const root = eng.clone();
+    let moves = root.getAllLegalMoves(color);
+    if (!moves.length) return null;
+    orderMoves(root, moves);
+    const badSet = cfg.memory ? ExpertMemory.badMovesFor(ExpertMemory.posKey(root)) : null;
+    deadline = performance.now() + cfg.timeMs;
+    let best = moves[0];
+
+    for (let depth = 1; depth <= cfg.maxDepth; depth++) {
+      let iterBest = null, iterBestScore = -Infinity, alpha = -Infinity;
+      const scored = [];
+      let completed = true;
+      for (const m of moves) {
+        root.forceMove(m);
+        let s = -negamax(root, depth - 1, 1, -Infinity, -alpha, cfg);
+        root.undo();
+        // Expert avoids replaying a move that previously led to its own mate.
+        if (badSet && badSet.has(ExpertMemory.moveKey(m))) s -= 500;
+        scored.push({ m, s });
+        if (s > iterBestScore) { iterBestScore = s; iterBest = m; }
+        if (s > alpha) alpha = s;
+        if (performance.now() > deadline) { completed = false; break; }
+      }
+      if (depth === 1 || completed) {
+        if (iterBest) best = iterBest;
+        scored.sort((a, b) => b.s - a.s);
+        const rest = moves.filter(m => !scored.find(x => x.m === m));
+        moves = scored.map(x => x.m).concat(rest);
+      }
+      if (!completed) break;
+    }
+    return stripOrder(best);
+  }
+
+  function pickMove(eng, color, level) {
+    const cfg = CONFIG[level] || CONFIG.beginner;
+    if (level === 'beginner') return pickBeginner(eng, color);
+    return searchRoot(eng, color, cfg);
+  }
+
+  return { pickMove };
+})();
+
+/* ═══════════════════════════════════════════
+   EXPERT MEMORY — light, honest game-to-game learning.
+   Persists in localStorage: how many games it has seen, and the
+   position→move pairs that ended with the Expert getting checkmated.
+   ═══════════════════════════════════════════ */
+const ExpertMemory = (() => {
+  const KEY = 'sooporChess.expertMemory.v1';
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) { /* private mode / disabled storage — degrade silently */ }
+    return { gamesSeen: 0, bad: {}, openings: {} };
+  }
+
+  function save(mem) {
+    try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) { /* ignore */ }
+  }
+
+  function posKey(eng) {
+    return eng.getFEN().split(' ').slice(0, 4).join(' '); // drop move clocks
+  }
+
+  function moveKey(m) {
+    return `${m.from[0]}${m.from[1]}${m.to[0]}${m.to[1]}${m.promotionPiece || ''}`;
+  }
+
+  function badMovesFor(pk) {
+    const mem = load();
+    return new Set(mem.bad[pk] || []);
+  }
+
+  // Called when the Expert (computer) gets checkmated. Records the last couple
+  // of moves it played so it steers away from that line next game.
+  function recordLoss(trail) {
+    const mem = load();
+    const tail = trail.slice(-2);
+    for (const step of tail) {
+      if (!mem.bad[step.pos]) mem.bad[step.pos] = [];
+      if (!mem.bad[step.pos].includes(step.move)) mem.bad[step.pos].push(step.move);
+    }
+    save(mem);
+  }
+
+  function recordGameSeen() {
+    const mem = load();
+    mem.gamesSeen = (mem.gamesSeen || 0) + 1;
+    save(mem);
+  }
+
+  return { load, save, posKey, moveKey, badMovesFor, recordLoss, recordGameSeen };
+})();
+
+function canUsePerkNow() {
+  return !gameOver && !pendingPromo && superMode;
+}
+
+function getPlyCount() {
+  return engine.getMoveHistory().length;
+}
+
+// Triple Advance is a setup-phase power: White's window is before any move
+// has been made, Black's window is right after White's single first action
+// (whichever it was). Once each side has had that one turn, it closes.
+function tripleAdvanceWindowOpen(color) {
+  const n = getPlyCount();
+  return (color === 'white' && n === 0) || (color === 'black' && n === 1);
+}
+
+function clearExpiredPerkEffects() {
+  if (shieldedSquare && getPlyCount() >= shieldExpirePly) {
+    shieldedSquare = null;
+    shieldExpirePly = 0;
+  }
+}
+
+function isShieldedSquare(row, col) {
+  return !!shieldedSquare && shieldedSquare[0] === row && shieldedSquare[1] === col && getPlyCount() < shieldExpirePly;
+}
+
+function moveHitsShield(move, board = engine.getBoard()) {
+  if (!shieldedSquare || getPlyCount() >= shieldExpirePly) return false;
+  const [sr, sc] = shieldedSquare;
+  if (move.to[0] === sr && move.to[1] === sc) return true;
+  if (move.enPassant && move.from[0] === sr && move.to[1] === sc) return true;
+  if (!move.enPassant && board[move.to[0]][move.to[1]] && move.to[0] === sr && move.to[1] === sc) return true;
+  return false;
+}
+
+function filterMovesAgainstShield(moves, board = engine.getBoard()) {
+  if (!shieldedSquare || getPlyCount() >= shieldExpirePly) return moves;
+  return moves.filter(m => !moveHitsShield(m, board));
+}
+
+function getScanSquaresFor(opponentColor) {
+  const board = engine.getBoard();
+  const targets = new Set();
+  const moves = engine.getAllLegalMovesFor(opponentColor);
+  for (const move of moves) {
+    const target = board[move.to[0]][move.to[1]];
+    if (target || move.enPassant) targets.add(`${move.to[0]},${move.to[1]}`);
+  }
+  return [...targets].map(s => s.split(',').map(Number));
+}
+
+function findSprintTargets(color) {
+  const board = engine.getBoard();
+  const targets = [];
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const piece = board[r][c];
+      if (!piece || !isPieceColor(piece, color) || piece.toLowerCase() !== 'p') continue;
+      const dir = color === 'white' ? -1 : 1;
+      const startRow = color === 'white' ? 6 : 1;
+      if (r !== startRow) continue;
+      const r1 = r + dir, r2 = r + dir * 2, r3 = r + dir * 3, r4 = r + dir * 4;
+      if (engine._inBounds(r1, c) && engine._inBounds(r2, c) && engine._inBounds(r3, c) && engine._inBounds(r4, c)) {
+        if (!board[r1][c] && !board[r2][c] && !board[r3][c] && !board[r4][c]) targets.push([r, c, r4, c]);
+      }
+    }
+  }
+  return targets;
+}
+
+function findDoubleTurnTargets(color, afterFirstMove) {
+  const board = engine.getBoard();
+  const targets = [];
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const piece = board[r][c];
+      if (!piece || !isPieceColor(piece, color)) continue;
+      if (piece.toLowerCase() === 'k' || piece.toLowerCase() === 'q') continue;
+      if (!afterFirstMove) targets.push([r, c]);
+    }
+  }
+  return targets;
+}
+
+function findPromotionRecallTargets(color) {
+  const board = engine.getBoard();
+  const targets = [];
+  const centerRow = 3;
+  const centerCols = [3, 4];
+  const pool = color === 'white' ? capturedByWhite : capturedByBlack;
+  if (!pool.length) return [];
+  for (const c of centerCols) {
+    if (!board[centerRow][c]) targets.push([centerRow, c]);
+  }
+  return targets;
+}
 
 /* ── Init Labels ── */
 for (let i = 8; i >= 1; i--) {
@@ -1082,6 +2006,14 @@ function buildPerkGrid() {
   });
 }
 
+// Triple Advance is only ever ready during its brief setup window, even
+// though PerkSystem itself (used/unused) doesn't know about that window.
+function perkIsReady(color, perk) {
+  const usable = perkSystem.canUse(color, perk);
+  if (perk.id === 'triple-advance') return usable && tripleAdvanceWindowOpen(color);
+  return usable;
+}
+
 function updatePerkGrid() {
   const turn = engine.getTurn();
   const cards = perkGrid.querySelectorAll('.perk-card');
@@ -1090,28 +2022,23 @@ function updatePerkGrid() {
     const perk = PERKS.find(p => p.id === perkId);
     if (!perk) return;
 
-    const charges = perkSystem.getCharges(turn, perk);
-    const ready = perkSystem.canUse(turn, perk);
+    const ready = perkIsReady(turn, perk);
     const isActive = activePerk === perkId;
+    // A setup-only perk whose window closed (without being used) reads
+    // "EXPIRED" rather than the misleading "USED".
+    const expired = perk.id === 'triple-advance' && !ready && perkSystem.canUse(turn, perk);
 
     card.classList.remove('disabled', 'ready', 'active-perk');
-    if (isActive) {
-      card.classList.add('active-perk');
-    } else if (ready) {
-      card.classList.add('ready');
-    } else {
-      card.classList.add('disabled');
-    }
+    if (isActive) card.classList.add('active-perk');
+    else if (ready) card.classList.add('ready');
+    else card.classList.add('disabled');
 
     const fill = card.querySelector('.perk-charge-fill');
     const text = card.querySelector('.perk-charge-text');
-    if (fill) fill.style.width = `${(charges / perk.cost) * 100}%`;
-    if (text) {
-      text.textContent = ready ? '✓ READY' : `${charges}/${perk.cost}`;
-    }
+    if (fill) fill.style.width = ready ? '100%' : '0%';
+    if (text) text.textContent = ready ? 'READY' : (expired ? 'EXPIRED' : 'USED');
   });
 
-  // Update hint
   const hint = document.getElementById('perkHint');
   if (hint) {
     if (activePerk) {
@@ -1119,7 +2046,7 @@ function updatePerkGrid() {
       hint.textContent = `Select a target for ${perk?.name || activePerk}...`;
       hint.style.color = 'var(--cyan)';
     } else {
-      hint.textContent = 'Earn charges by capturing and moving';
+      hint.textContent = 'Six one-time perks per side';
       hint.style.color = '';
     }
   }
@@ -1129,10 +2056,9 @@ function showPerkTooltip(e, perkId) {
   const perk = PERKS.find(p => p.id === perkId);
   if (!perk) return;
   const turn = engine.getTurn();
-  const charges = perkSystem.getPerkState(perkId) || { current: 0 };
   document.getElementById('ttName').textContent = `${perk.icon} ${perk.name}`;
   document.getElementById('ttDesc').textContent = perk.desc;
-  const ready = perkSystem.canUse(turn, perk);
+  const ready = perkIsReady(turn, perk);
   document.getElementById('ttCost').textContent = ready
     ? '✓ READY — click to activate'
     : `Charges: ${perkSystem.getCharges(turn, perk)}/${perk.cost} (${perk.costType})`;
@@ -1154,107 +2080,114 @@ superSwitch.addEventListener('click', () => {
   superSwitch.classList.toggle('on', superMode);
   superLabel.classList.toggle('active', superMode);
   superLabelR.classList.toggle('active', superMode);
-  superBadge.classList.toggle('visible', superMode);
   perkReveal.classList.toggle('open', superMode);
   if (!superMode && activePerk) cancelPerk();
   updatePerkGrid();
 });
 
+btnHelp.addEventListener('click', () => {
+  if (helpOpen) closeHelp(); else openHelp();
+});
+btnHelpClose.addEventListener('click', closeHelp);
+helpOverlay.addEventListener('click', (e) => {
+  if (e.target === helpOverlay) closeHelp();
+});
+btnMode.addEventListener('click', () => {
+  playMode = playMode === 'pvp' ? 'pvc' : 'pvp';
+  computerColor = 'black';
+  syncModeUI();
+  if (playMode === 'pvc') scheduleComputerMove();
+});
+
+if (difficultyBar) {
+  difficultyBar.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      difficulty = btn.dataset.diff;
+      syncDifficultyUI();
+      // If it's already the CPU's turn, let the new level take over the move.
+      if (playMode === 'pvc' && !computerBusy) scheduleComputerMove();
+    });
+  });
+}
+syncModeUI();
+
 /* ═══════════════════════════════════════════
    PERK ACTIVATION
    ═══════════════════════════════════════════ */
 function onPerkClick(perkId) {
-  if (gameOver || pendingPromo) return;
-  if (!superMode) return;
-
+  if (!canUsePerkNow()) return;
   const turn = engine.getTurn();
   const perk = PERKS.find(p => p.id === perkId);
   if (!perk || !perkSystem.canUse(turn, perk)) return;
 
-  const board = engine.getBoard();
-
-  switch (perkId) {
-    case 'recall': {
-      activePerk = 'recall';
-      perkTargets = [];
-      const homeRow = turn === 'white' ? 7 : 0;
-      for (let c = 0; c < 8; c++) {
-        if (!board[homeRow][c]) perkTargets.push([homeRow, c]);
-      }
-      break;
-    }
-    case 'firewall': {
-      activePerk = 'firewall';
-      perkTargets = [];
-      for (let r = 0; r < 8; r++)
-        for (let c = 0; c < 8; c++) {
-          const p = board[r][c];
-          if (p && isPieceColor(p, turn)) perkTargets.push([r, c]);
-        }
-      break;
-    }
-    case 'overclock': {
-      activePerk = 'overclock';
-      perkTargets = [];
-      const kc = turn === 'white' ? 'N' : 'n';
-      for (let r = 0; r < 8; r++)
-        for (let c = 0; c < 8; c++)
-          if (board[r][c] === kc) perkTargets.push([r, c]);
-      break;
-    }
-    case 'glitch': {
-      activePerk = 'glitch';
-      glitchFirst = null;
-      perkTargets = [];
-      for (let r = 0; r < 8; r++)
-        for (let c = 0; c < 8; c++) {
-          const p = board[r][c];
-          if (!p || !isPieceColor(p, turn)) continue;
-          for (const [dr, dc] of [[0,1],[0,-1],[1,0],[-1,0]]) {
-            const nr = r+dr, nc = c+dc;
-            if (nr>=0 && nr<8 && nc>=0 && nc<8) {
-              const np = board[nr][nc];
-              if (np && isPieceColor(np, turn)) { perkTargets.push([r, c]); break; }
-            }
-          }
-        }
-      break;
-    }
-    case 'scan': {
-      // Instant — no target selection needed
-      perkSystem.use(turn, perk);
-      const oppColor = turn === 'white' ? 'black' : 'white';
-      const oppMoves = engine.getAllLegalMoves(oppColor);
-      const captures = oppMoves.filter(m => board[m.to[0]][m.to[1]]);
-      if (captures.length > 0) {
-        const best = captures.sort((a, b) => {
-          const va = PIECE_VALUES[board[a.to[0]][a.to[1]].toLowerCase()] || 0;
-          const vb = PIECE_VALUES[board[b.to[0]][b.to[1]].toLowerCase()] || 0;
-          return vb - va;
-        })[0];
-        scanHighlight = [...best.to];
-        if (scanTimeout) clearTimeout(scanTimeout);
-        scanTimeout = setTimeout(() => { scanHighlight = null; render(); }, 4000);
-      }
-      updatePerkGrid();
-      render();
-      return;
-    }
-  }
-
-  if (perkTargets.length === 0) {
-    activePerk = null;
+  if (perkId === 'double-turn') {
+    if (!perkSystem.use(turn, perk)) return;
+    doubleTurnState = { stage: 1, color: turn, firstMove: null, secondMove: null };
+    activePerk = perkId;
+    perkTargets = [];
+    clearSelection();
+    updatePerkGrid();
+    render();
     return;
   }
-  clearSelection();
-  updatePerkGrid();
-  render();
+
+  if (perkId === 'pawn-recall') {
+    if (!perkSystem.use(turn, perk)) return;
+    activePerk = perkId;
+    perkTargets = findPromotionRecallTargets(turn);
+    clearSelection();
+    updatePerkGrid();
+    render();
+    return;
+  }
+
+  if (perkId === 'firewall') {
+    if (!perkSystem.use(turn, perk)) return;
+    activePerk = perkId;
+    perkTargets = [];
+    clearSelection();
+    updatePerkGrid();
+    render();
+    return;
+  }
+
+  if (perkId === 'scan') {
+    if (!perkSystem.use(turn, perk)) return;
+    scanHighlight = getScanSquaresFor(engine.getTurn() === 'white' ? 'black' : 'white');
+    if (scanTimeout) clearTimeout(scanTimeout);
+    scanTimeout = setTimeout(() => { scanHighlight = null; render(); }, 1800);
+    activePerk = null;
+    perkTargets = [];
+    updatePerkGrid();
+    render();
+    return;
+  }
+
+  if (perkId === 'pawn-sprint') {
+    if (!perkSystem.use(turn, perk)) return;
+    sprintArmed = true;
+    activePerk = null;
+    updatePerkGrid();
+    render();
+    return;
+  }
+
+  if (perkId === 'triple-advance') {
+    if (!tripleAdvanceWindowOpen(turn)) return;
+    if (!perkSystem.use(turn, perk)) return;
+    tripleAdvanceArmed = true;
+    activePerk = null;
+    updatePerkGrid();
+    render();
+  }
 }
 
 function cancelPerk() {
   activePerk = null;
+  doubleTurnState = null;
   perkTargets = [];
-  glitchFirst = null;
+  sprintArmed = false;
+  tripleAdvanceArmed = false;
   selectedSquare = null;
   updatePerkGrid();
   render();
@@ -1303,7 +2236,7 @@ function render() {
         sq.classList.add('perk-target');
 
       // Scan highlight
-      if (scanHighlight && scanHighlight[0] === r && scanHighlight[1] === c)
+      if (scanHighlight && scanHighlight.some(t => t[0] === r && t[1] === c))
         sq.classList.add('scan-highlight');
 
       sq.innerHTML = '';
@@ -1312,7 +2245,7 @@ function render() {
         span.classList.add('piece');
         const isWhite = piece === piece.toUpperCase();
         span.classList.add(isWhite ? 'white-piece' : 'black-piece');
-        if (shieldedSquare && shieldedSquare[0] === r && shieldedSquare[1] === c)
+        if (isShieldedSquare(r, c))
           span.classList.add('shielded');
         if (overclockKnight && overclockKnight[0] === r && overclockKnight[1] === c)
           span.classList.add('overclock');
@@ -1325,24 +2258,21 @@ function render() {
   renderCaptured();
   renderMoveHistory();
   updatePerkGrid();
+  if (typeof Tutorial !== 'undefined' && Tutorial.active) Tutorial.applyHighlights();
 }
 
 function renderCaptured() {
   capturedByWhiteEl.innerHTML = '';
   capturedByBlackEl.innerHTML = '';
   const sortFn = (a, b) => (PIECE_VALUES[b.toLowerCase()] || 0) - (PIECE_VALUES[a.toLowerCase()] || 0);
-  [...capturedByWhite].sort(sortFn).forEach(p => {
+  const addCap = (p, el) => {
     const span = document.createElement('span');
-    span.classList.add('cap-piece');
+    span.classList.add('cap-piece', p === p.toUpperCase() ? 'white-piece' : 'black-piece');
     span.textContent = PIECE_CHARS[p];
-    capturedByWhiteEl.appendChild(span);
-  });
-  [...capturedByBlack].sort(sortFn).forEach(p => {
-    const span = document.createElement('span');
-    span.classList.add('cap-piece');
-    span.textContent = PIECE_CHARS[p];
-    capturedByBlackEl.appendChild(span);
-  });
+    el.appendChild(span);
+  };
+  [...capturedByWhite].sort(sortFn).forEach(p => addCap(p, capturedByWhiteEl));
+  [...capturedByBlack].sort(sortFn).forEach(p => addCap(p, capturedByBlackEl));
 }
 
 function renderMoveHistory() {
@@ -1383,95 +2313,79 @@ function onSquareClick(row, col) {
   const piece = board[row][col];
   const turn = engine.getTurn();
 
-  // ── Perk activation mode ──
-  if (activePerk) {
-    const target = perkTargets.find(t => t[0] === row && t[1] === col);
-    if (!target) { cancelPerk(); return; }
-
-    switch (activePerk) {
-      case 'recall': {
-        const myCaptured = turn === 'white' ? capturedByBlack : capturedByWhite;
-        if (myCaptured.length === 0) { cancelPerk(); return; }
-        const best = myCaptured.sort((a, b) =>
-          (PIECE_VALUES[b.toLowerCase()]||0) - (PIECE_VALUES[a.toLowerCase()]||0)
-        )[0];
-        const restorePiece = turn === 'white' ? best.toUpperCase() : best.toLowerCase();
-        board[row][col] = restorePiece;
-        const idx = myCaptured.indexOf(best);
-        if (idx >= 0) myCaptured.splice(idx, 1);
-        perkSystem.use(turn, PERKS.find(p => p.id === 'recall'));
-        break;
-      }
-      case 'firewall': {
-        shieldedSquare = [row, col];
-        perkSystem.use(turn, PERKS.find(p => p.id === 'firewall'));
-        break;
-      }
-      case 'overclock': {
-        overclockKnight = [row, col];
-        perkSystem.use(turn, PERKS.find(p => p.id === 'overclock'));
-        break;
-      }
-      case 'glitch': {
-        if (!glitchFirst) {
-          glitchFirst = [row, col];
-          // Show adjacent own pieces as second targets
-          perkTargets = [];
-          for (const [dr, dc] of [[0,1],[0,-1],[1,0],[-1,0]]) {
-            const nr = row+dr, nc = col+dc;
-            if (nr>=0 && nr<8 && nc>=0 && nc<8) {
-              const np = board[nr][nc];
-              if (np && isPieceColor(np, turn)) perkTargets.push([nr, nc]);
-            }
-          }
-          if (perkTargets.length === 0) { cancelPerk(); return; }
-          render();
-          return;
-        } else {
-          // Swap
-          const temp = board[glitchFirst[0]][glitchFirst[1]];
-          board[glitchFirst[0]][glitchFirst[1]] = board[row][col];
-          board[row][col] = temp;
-          perkSystem.use(turn, PERKS.find(p => p.id === 'glitch'));
-        }
-        break;
-      }
-    }
-
+  if (activePerk === 'firewall') {
+    if (!piece || !isPieceColor(piece, turn) || piece.toLowerCase() === 'k') return;
+    shieldedSquare = [row, col];
+    shieldExpirePly = getPlyCount() + 2;
     activePerk = null;
     perkTargets = [];
-    glitchFirst = null;
-    selectedSquare = null;
+    clearSelection();
+    updatePerkGrid();
     render();
     return;
   }
 
-  // ── Normal move flow ──
+  if (activePerk === 'double-turn' && doubleTurnState) {
+    handleDoubleTurnClick(row, col);
+    return;
+  }
+
+  if (activePerk === 'pawn-recall') {
+    handlePawnRecallClick(row, col);
+    return;
+  }
+
+  if (sprintArmed && selectedSquare) {
+    const from = selectedSquare;
+    const selectedPiece = board[from[0]][from[1]];
+    const startRow = turn === 'white' ? 6 : 1;
+    if (selectedPiece && selectedPiece.toLowerCase() === 'p' && from[0] === startRow) {
+      const dir = turn === 'white' ? -1 : 1;
+      const sprintTo = [from[0] + dir * 4, from[1]];
+      if (row === sprintTo[0] && col === sprintTo[1]) {
+        const pathClear = [1,2,3,4].every(step => {
+          const r = from[0] + dir * step;
+          return engine.getBoard()[r][from[1]] === null;
+        });
+        if (!pathClear) return;
+        const ok = executeMove({ from: [...from], to: sprintTo });
+        if (ok) sprintArmed = false;
+        return;
+      }
+    }
+  }
+
+  if (sprintArmed && !selectedSquare) sprintArmed = false;
+
+  if (tripleAdvanceArmed && selectedSquare) {
+    const from = selectedSquare;
+    const selectedPiece = board[from[0]][from[1]];
+    const startRow = turn === 'white' ? 6 : 1;
+    if (selectedPiece && selectedPiece.toLowerCase() === 'p' && from[0] === startRow) {
+      const dir = turn === 'white' ? -1 : 1;
+      const advanceTo = [from[0] + dir * 3, from[1]];
+      if (row === advanceTo[0] && col === advanceTo[1]) {
+        const pathClear = [1,2,3].every(step => {
+          const r = from[0] + dir * step;
+          return engine.getBoard()[r][from[1]] === null;
+        });
+        if (!pathClear) return;
+        const ok = executeMove({ from: [...from], to: advanceTo });
+        if (ok) tripleAdvanceArmed = false;
+        return;
+      }
+    }
+  }
+
+  if (tripleAdvanceArmed && !selectedSquare) tripleAdvanceArmed = false;
+
   if (selectedSquare) {
     const moveMatch = legalMoves.find(m => m.to[0] === row && m.to[1] === col);
     if (moveMatch) {
-      // Shielded piece can't be captured
-      if (shieldedSquare && shieldedSquare[0] === row && shieldedSquare[1] === col && moveMatch.capture) {
-        clearSelection(); render(); return;
-      }
-      if (moveMatch.promotionPiece) {
-        pendingPromo = { from: [...selectedSquare], to: [row, col] };
-        showPromotionModal(turn);
-        return;
-      }
       const sourceSquare = [...selectedSquare];
-      executeMove({ from: sourceSquare, to: [row, col] });
-
-      // Overclock: allow the same knight to move twice this turn.
-      if (overclockKnight && overclockKnight[0] === sourceSquare[0] && overclockKnight[1] === sourceSquare[1]) {
-        overclockKnight = null;
-        selectedSquare = [row, col];
-        legalMoves = engine.getLegalMoves(row, col);
-        activePerk = null;
-        perkTargets = [];
-        render();
-        return;
-      }
+      const didMove = executeMove({ from: sourceSquare, to: [row, col], promotionPiece: moveMatch.promotionPiece });
+      if (didMove && sprintArmed) sprintArmed = false;
+      if (didMove && tripleAdvanceArmed) tripleAdvanceArmed = false;
       return;
     }
 
@@ -1487,6 +2401,107 @@ function onSquareClick(row, col) {
   if (piece && isPieceColor(piece, turn)) {
     selectSquare(row, col);
   }
+}
+
+function handleDoubleTurnClick(row, col) {
+  const board = engine.getBoard();
+  const turn = engine.getTurn();
+  const piece = board[row][col];
+
+  if (doubleTurnState.stage === 1) {
+    if (!piece || !isPieceColor(piece, turn) || piece.toLowerCase() === 'q' || piece.toLowerCase() === 'k') return;
+    selectedSquare = [row, col];
+    legalMoves = filterMovesAgainstShield(engine.getLegalMoves(row, col), board);
+    doubleTurnState.firstMove = [row, col];
+    doubleTurnState.stage = 2;
+    perkTargets = legalMoves.map(m => [...m.to]);
+    render();
+    return;
+  }
+
+  if (doubleTurnState.stage === 2) {
+    const mv = legalMoves.find(m => m.to[0] === row && m.to[1] === col);
+    if (!mv) { cancelPerk(); return; }
+    executeMove({ from: [...selectedSquare], to: [row, col], promotionPiece: mv.promotionPiece }, { skipSchedule: true, keepTurn: true });
+    selectedSquare = null;
+    legalMoves = [];
+    doubleTurnState.stage = 3;
+    const board2 = engine.getBoard();
+    perkTargets = [];
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const p = board2[r][c];
+        if (!p || !isPieceColor(p, turn) || p.toLowerCase() === 'q' || p.toLowerCase() === 'k') continue;
+        perkTargets.push([r, c]);
+      }
+    }
+    if (!perkTargets.length) { cancelPerk(); return; }
+    render();
+    return;
+  }
+
+  if (doubleTurnState.stage === 3) {
+    if (!piece || !isPieceColor(piece, turn) || piece.toLowerCase() === 'q' || piece.toLowerCase() === 'k') return;
+    selectedSquare = [row, col];
+    legalMoves = filterMovesAgainstShield(engine.getLegalMoves(row, col), board);
+    perkTargets = legalMoves.map(m => [...m.to]);
+    doubleTurnState.stage = 4;
+    render();
+    return;
+  }
+
+  if (doubleTurnState.stage === 4) {
+    const mv = legalMoves.find(m => m.to[0] === row && m.to[1] === col);
+    if (!mv) { cancelPerk(); return; }
+    executeMove({ from: [...selectedSquare], to: [row, col], promotionPiece: mv.promotionPiece });
+    finishPerkMove(turn, null, false);
+  }
+}
+
+function handlePawnRecallClick(row, col) {
+  const turn = engine.getTurn();
+  const board = engine.getBoard();
+  const centerTargets = findPromotionRecallTargets(turn);
+  const target = centerTargets.find(t => t[0] === row && t[1] === col);
+  if (!target) { cancelPerk(); return; }
+  const pool = turn === 'white' ? capturedByWhite : capturedByBlack;
+  let bringBack = null;
+  if (pool.length) bringBack = pool.shift();
+  const pawnPiece = turn === 'white' ? 'P' : 'p';
+  engine.setPiece(row, col, pawnPiece);
+  if (bringBack) {
+    const homeRow = turn === 'white' ? 7 : 0;
+    let placed = false;
+    for (let c = 0; c < 8; c++) {
+      if (!board[homeRow][c]) {
+        engine.setPiece(homeRow, c, turn === 'white' ? bringBack.toUpperCase() : bringBack.toLowerCase());
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      const middleRow = 3;
+      const spots = [3,4].filter(c => !board[middleRow][c]);
+      if (spots.length) engine.setPiece(middleRow, spots[0], turn === 'white' ? bringBack.toUpperCase() : bringBack.toLowerCase());
+    }
+  }
+  finishPerkMove(turn, null, true);
+}
+
+function finishPerkMove(turn, move, endTurnNow) {
+  activePerk = null;
+  doubleTurnState = null;
+  perkTargets = [];
+  selectedSquare = null;
+  legalMoves = [];
+  lastMove = move ? { from: [...move.from], to: [...move.to] } : lastMove;
+  if (endTurnNow) {
+    if (playMode === 'pvc' && !gameOver && !pendingPromo) scheduleComputerMove();
+  } else {
+    render();
+    return;
+  }
+  render();
 }
 
 function selectSquare(row, col) {
@@ -1509,59 +2524,57 @@ function isPieceColor(piece, color) {
 /* ═══════════════════════════════════════════
    EXECUTE MOVE
    ═══════════════════════════════════════════ */
-function executeMove(move) {
+function executeMove(move, options = {}) {
   const board = engine.getBoard();
   const targetPiece = board[move.to[0]][move.to[1]];
   const movingPiece = board[move.from[0]][move.from[1]];
   const movingColor = movingPiece === movingPiece.toUpperCase() ? 'white' : 'black';
 
-  // Shielded piece can't be captured
-  if (shieldedSquare && shieldedSquare[0] === move.to[0] && shieldedSquare[1] === move.to[1] && targetPiece) {
-    clearSelection(); render(); return;
+  // FIX: use the live engine board for special-move bookkeeping and let the engine own turn/state updates.
+  if (moveHitsShield(move, board)) {
+    clearSelection();
+    return false;
   }
 
-  // Track captures
+  const success = options.keepTurn ? engine.forceMove(move, { keepTurn: true }) : engine.forceMove(move);
+  if (!success) { clearSelection(); return false; }
+
   if (targetPiece) {
     if (movingColor === 'white') capturedByWhite.push(targetPiece);
     else capturedByBlack.push(targetPiece);
-    if (shieldedSquare && shieldedSquare[0] === move.to[0] && shieldedSquare[1] === move.to[1])
-      shieldedSquare = null;
-  }
-
-  // En passant capture tracking
-  if (movingPiece.toLowerCase() === 'p' && !targetPiece && move.from[1] !== move.to[1]) {
-    const capturedPawn = board[move.from[0]][move.to[1]];
-    if (capturedPawn) {
-      if (movingColor === 'white') capturedByWhite.push(capturedPawn);
-      else capturedByBlack.push(capturedPawn);
+  } else if (move.enPassant) {
+    const capRow = move.from[0];
+    const capCol = move.to[1];
+    const epPiece = board[capRow][capCol];
+    if (epPiece) {
+      if (movingColor === 'white') capturedByWhite.push(epPiece);
+      else capturedByBlack.push(epPiece);
     }
-  }
-
-  const success = engine.makeMove(move);
-  if (!success) { clearSelection(); return; }
-
-  // Update perk charges with correct board state
-  perkSystem.onMoveMade(move, board, movingColor);
-
-  // Clear shield after opponent's turn completes
-  if (movingColor !== engine.getTurn()) {
-    shieldedSquare = null;
   }
 
   lastMove = { from: [...move.from], to: [...move.to] };
   clearSelection();
 
-  // Check game over
-  const nextTurn = engine.getTurn();
-  if (engine.isCheckmate(nextTurn)) {
+  const turn = engine.getTurn();
+  if (engine.isDraw()) {
     gameOver = true;
-    showGameOver('checkmate', nextTurn === 'white' ? 'Black' : 'White');
-  } else if (engine.isStalemate(nextTurn)) {
+    finalizeExpertGame(false);
+    showGameOver('draw');
+  } else if (engine.isCheckmate(turn)) {
     gameOver = true;
-    showGameOver('stalemate', null);
+    // `turn` is the side that has been mated — the loser.
+    finalizeExpertGame(turn === computerColor);
+    showGameOver('checkmate', turn === 'white' ? 'Black' : 'White');
+  } else if (engine.isStalemate(turn)) {
+    gameOver = true;
+    finalizeExpertGame(false);
+    showGameOver('draw');
   }
 
   render();
+  if (!options.skipSchedule && !gameOver) scheduleComputerMove();
+  if (typeof Tutorial !== 'undefined' && Tutorial.active) Tutorial.onMoveExecuted(move);
+  return true;
 }
 
 /* ═══════════════════════════════════════════
@@ -1572,7 +2585,7 @@ function showPromotionModal(turn) {
   const pieces = ['Q', 'R', 'B', 'N'];
   pieces.forEach(p => {
     const btn = document.createElement('button');
-    btn.classList.add('promo-choice');
+    btn.classList.add('promo-choice', turn === 'white' ? 'white-piece' : 'black-piece');
     btn.textContent = PIECE_CHARS[turn === 'white' ? p : p.toLowerCase()];
     btn.title = p;
     btn.addEventListener('click', () => {
@@ -1589,12 +2602,16 @@ function showPromotionModal(turn) {
    GAME OVER
    ═══════════════════════════════════════════ */
 function showGameOver(type, winner) {
-  gameOverBox.className = 'modal-box gameover-box' + (type === 'stalemate' ? ' stalemate' : '');
+  // FIX: distinguish wins, draws, and resignations instead of reusing the checkmate UI.
+  gameOverBox.className = 'modal-box gameover-box' + (type === 'stalemate' || type === 'draw' ? ' stalemate' : '');
   if (type === 'checkmate') {
     gameOverTitle.textContent = 'Checkmate';
     gameOverMessage.textContent = winner + ' wins!';
+  } else if (type === 'resign') {
+    gameOverTitle.textContent = 'Resignation';
+    gameOverMessage.textContent = winner + ' wins by resignation.';
   } else {
-    gameOverTitle.textContent = 'Stalemate';
+    gameOverTitle.textContent = 'Draw';
     gameOverMessage.textContent = 'The game is a draw.';
   }
   gameOverOverlay.classList.add('active');
@@ -1604,6 +2621,7 @@ function showGameOver(type, winner) {
    CONTROLS
    ═══════════════════════════════════════════ */
 document.getElementById('btnUndo').addEventListener('click', () => {
+  if (typeof Tutorial !== 'undefined' && Tutorial.active) return;
   if (engine.getMoveHistory().length === 0) return;
   engine.undo();
   rebuildCapturedAfterUndo();
@@ -1617,6 +2635,7 @@ document.getElementById('btnUndo').addEventListener('click', () => {
   gameOver = false;
   gameOverOverlay.classList.remove('active');
   shieldedSquare = null;
+  shieldExpirePly = 0;
   overclockKnight = null;
   activePerk = null;
   perkTargets = [];
@@ -1626,11 +2645,17 @@ document.getElementById('btnUndo').addEventListener('click', () => {
   render();
 });
 
-document.getElementById('btnNew').addEventListener('click', newGame);
+document.getElementById('btnNew').addEventListener('click', () => {
+  if (typeof Tutorial !== 'undefined' && Tutorial.active) Tutorial.exit();
+  newGame();
+});
 document.getElementById('btnResign').addEventListener('click', () => {
+  if (typeof Tutorial !== 'undefined' && Tutorial.active) return;
   if (gameOver) return;
   gameOver = true;
-  showGameOver('checkmate', engine.getTurn() === 'white' ? 'Black' : 'White');
+  // The side to move resigns; if that's the human vs Expert, the CPU "wins".
+  finalizeExpertGame(false);
+  showGameOver('resign', engine.getTurn() === 'white' ? 'Black' : 'White');
 });
 document.getElementById('btnPlayAgain').addEventListener('click', newGame);
 
@@ -1644,11 +2669,18 @@ function newGame() {
   pendingPromo = null;
   gameOver = false;
   activePerk = null;
+  doubleTurnState = null;
   perkTargets = [];
-  shieldedSquare = null;
+  sprintArmed = false;
+  tripleAdvanceArmed = false;
+  recallArmed = false;
   overclockKnight = null;
   glitchFirst = null;
+  shieldedSquare = null;
+  shieldExpirePly = 0;
   scanHighlight = null;
+  expertTrail = [];
+  expertGameRecorded = false;
   if (scanTimeout) clearTimeout(scanTimeout);
   perkSystem.reset();
   gameOverOverlay.classList.remove('active');
@@ -1694,9 +2726,401 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+/* ═══════════════════════════════════════════
+   TUTORIAL SYSTEM
+   A guided, interactive coach. Two tracks (Regular / Soopor).
+   It drives the real engine + board so learners make real moves.
+   ═══════════════════════════════════════════ */
+function algToCoord(a) { return [8 - parseInt(a[1], 10), a.charCodeAt(0) - 97]; }
+
+// Build an arbitrary position on a clean engine, then reset all UI/game state.
+function tutSetupBoard(map, turn) {
+  engine = new ChessEngine();
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) engine._board[r][c] = null;
+  for (const sq in map) { const [r, c] = algToCoord(sq); engine._board[r][c] = map[sq]; }
+  engine._turn = turn || 'white';
+  engine._castling = { K: false, Q: false, k: false, q: false };
+  engine._enPassantTarget = null;
+  engine._halfmoveClock = 0;
+  engine._fullmoveNumber = 1;
+  engine._history = [];
+  engine._moveLog = [];
+  engine._repetition = new Map();
+  if (engine._recordPosition) engine._recordPosition();
+  selectedSquare = null; legalMoves = []; lastMove = null;
+  capturedByWhite = []; capturedByBlack = []; pendingPromo = null; gameOver = false;
+  activePerk = null; doubleTurnState = null; perkTargets = []; sprintArmed = false;
+  tripleAdvanceArmed = false;
+  shieldedSquare = null; shieldExpirePly = 0; scanHighlight = null;
+  if (scanTimeout) clearTimeout(scanTimeout);
+  perkSystem.reset();
+  gameOverOverlay.classList.remove('active');
+  promoModal.classList.remove('active');
+}
+
+const Tutorial = {
+  active: false,
+  track: null,
+  steps: [],
+  index: 0,
+  solved: false,
+
+  el: {
+    coach: document.getElementById('coach'),
+    badge: document.getElementById('coachBadge'),
+    title: document.getElementById('coachTitle'),
+    progress: document.getElementById('coachProgress'),
+    body: document.getElementById('coachBody'),
+    status: document.getElementById('coachStatus'),
+    actions: document.getElementById('coachActions'),
+  },
+
+  start(trackName) {
+    welcomeOverlay.classList.remove('active');
+    this.active = true;
+    this.track = trackName;
+    this.steps = (trackName === 'soopor') ? this.SOOPOR : this.REGULAR;
+    this.index = 0;
+    document.body.classList.remove('super-mode');
+    superMode = false; superSwitch.classList.remove('on');
+    superLabel.classList.remove('active'); superLabelR.classList.remove('active');
+    perkReveal.classList.remove('open');
+    this.el.coach.classList.add('open');
+    this.goTo(0);
+  },
+
+  exit() {
+    this.active = false;
+    this.solved = false;
+    this.el.coach.classList.remove('open', 'celebrate');
+    this.clearHighlights();
+  },
+
+  goTo(i) {
+    if (i < 0 || i >= this.steps.length) { this.exit(); newGame(); return; }
+    this.index = i;
+    this.solved = false;
+    const step = this.steps[i];
+
+    // Apply mode/board setup for the step.
+    if (step.setup) {
+      const s = step.setup;
+      if (s.board) tutSetupBoard(s.board, s.turn || 'white');
+      else if (s.fresh) { newGame(); }
+      // Game mode
+      playMode = s.mode || 'pvp';
+      computerColor = s.computerColor || 'black';
+      syncModeUI();
+      if (s.difficulty) { difficulty = s.difficulty; syncDifficultyUI(); }
+      // Super mode
+      const wantSuper = !!s.super;
+      if (wantSuper !== superMode) {
+        superMode = wantSuper;
+        document.body.classList.toggle('super-mode', superMode);
+        superSwitch.classList.toggle('on', superMode);
+        superLabel.classList.toggle('active', superMode);
+        superLabelR.classList.toggle('active', superMode);
+        perkReveal.classList.toggle('open', superMode);
+      }
+    }
+
+    this.render();
+    render();
+    this.applyHighlights();
+    if (step.onEnter) step.onEnter();
+    // If a sandbox step is CPU vs human and it's the CPU's move, let it go.
+    if (step.setup && step.setup.mode === 'pvc') scheduleComputerMove();
+  },
+
+  next() { this.goTo(this.index + 1); },
+  back() { this.goTo(this.index - 1); },
+
+  render() {
+    const step = this.steps[this.index];
+    this.el.badge.textContent = this.track === 'soopor' ? 'Soopor' : 'Chess 101';
+    this.el.title.textContent = step.title;
+    this.el.progress.textContent = `${this.index + 1} / ${this.steps.length}`;
+    this.el.body.innerHTML = step.body;
+    this.el.status.textContent = '';
+    this.el.status.className = 'coach-status';
+    this.el.coach.classList.remove('celebrate');
+    this.renderActions();
+  },
+
+  renderActions() {
+    const step = this.steps[this.index];
+    const a = this.el.actions;
+    a.innerHTML = '';
+    const mk = (label, cls, fn) => {
+      const b = document.createElement('button');
+      b.className = 'btn ' + (cls || '');
+      b.textContent = label;
+      b.addEventListener('click', fn);
+      return b;
+    };
+    // Back (not on first step)
+    if (this.index > 0) a.appendChild(mk('◀ Back', 'btn-ghost', () => this.back()));
+    a.appendChild(Object.assign(document.createElement('span'), { className: 'spacer' }));
+
+    if (step.sandbox) {
+      a.appendChild(mk('💡 Hint', '', () => this.giveHint()));
+      a.appendChild(mk('Finish ✓', 'btn-primary', () => { this.exit(); newGame(); }));
+      return;
+    }
+    if (step.expect && !this.solved) {
+      a.appendChild(mk('Skip ▷', 'btn-ghost', () => this.next()));
+      return;
+    }
+    // Info step OR a solved move step.
+    const label = (this.index === this.steps.length - 1) ? 'Done ✓' : 'Next ▶';
+    a.appendChild(mk(label, 'btn-primary', () => this.next()));
+  },
+
+  // Highlight from/to squares for the current step (re-applied after every render()).
+  applyHighlights() {
+    if (!this.active) return;
+    this.clearHighlights();
+    const step = this.steps[this.index];
+    if (step && step.highlight && !this.solved) {
+      const h = step.highlight;
+      if (h.from) { const [r, c] = algToCoord(h.from); squareEls[r][c].classList.add('tutor-from'); }
+      if (h.to) { const [r, c] = algToCoord(h.to); squareEls[r][c].classList.add('tutor-to'); }
+    }
+  },
+  clearHighlights() {
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++)
+      squareEls[r][c].classList.remove('tutor-from', 'tutor-to', 'tutor-good');
+  },
+
+  matchExpect(step, move) {
+    const e = step.expect;
+    if (typeof e === 'function') return e(move);
+    if (e.from && (move.from[0] !== algToCoord(e.from)[0] || move.from[1] !== algToCoord(e.from)[1])) return false;
+    if (e.to && (move.to[0] !== algToCoord(e.to)[0] || move.to[1] !== algToCoord(e.to)[1])) return false;
+    return true;
+  },
+
+  // Called from executeMove() after any successful move.
+  onMoveExecuted(move) {
+    if (!this.active) return;
+    const step = this.steps[this.index];
+    if (!step || !step.expect || this.solved) return;
+
+    if (this.matchExpect(step, move)) {
+      this.solved = true;
+      this.clearHighlights();
+      const wasMate = gameOver;
+      if (step.win && wasMate) {
+        // Suppress the default game-over modal — we celebrate in the coach.
+        gameOverOverlay.classList.remove('active');
+        this.el.coach.classList.add('celebrate');
+      }
+      this.el.status.textContent = step.success || '✓ Nice — that\'s exactly right!';
+      this.el.status.className = 'coach-status good';
+      this.renderActions();
+    } else {
+      // Wrong (but legal) move — gently reset the position and let them retry.
+      this.el.status.textContent = step.retry || 'Not quite — let\'s reset and try the highlighted move.';
+      this.el.status.className = 'coach-status bad';
+      setTimeout(() => {
+        if (!this.active) return;
+        const s = step.setup;
+        if (s && s.board) tutSetupBoard(s.board, s.turn || 'white');
+        render();
+        this.applyHighlights();
+      }, 900);
+    }
+  },
+
+  giveHint() {
+    const color = engine.getTurn();
+    let move = null;
+    try { move = ChessAI.pickMove(engine, color, 'pro'); } catch (e) {}
+    if (!move) { this.el.status.textContent = 'No suggestion available right now.'; this.el.status.className = 'coach-status'; return; }
+    this.clearHighlights();
+    const [fr, fc] = move.from, [tr, tc] = move.to;
+    squareEls[fr][fc].classList.add('tutor-from');
+    squareEls[tr][tc].classList.add('tutor-to');
+    this.el.status.textContent = `💡 Try ${coordToAlg(fr, fc)} → ${coordToAlg(tr, tc)}`;
+    this.el.status.className = 'coach-status good';
+    setTimeout(() => { if (this.active) { this.clearHighlights(); } }, 2600);
+  },
+};
+
+/* ── Lesson scripts ── */
+const K2 = { e1: 'K', e8: 'k' }; // both kings, kept off to the side
+Tutorial.REGULAR = [
+  {
+    title: 'The board & the goal',
+    body: 'Welcome! Chess is played on an 8×8 board. You command the <b>white</b> pieces. ' +
+      'The whole game has one goal: trap the enemy <b>King</b> so it cannot escape. That\'s called <b>checkmate</b>. ' +
+      'Let\'s meet your army, one piece at a time.',
+    setup: { fresh: true, mode: 'pvp' },
+  },
+  {
+    title: 'The Pawn — your foot soldier',
+    body: 'This is a <span class="piece-glyph">♙</span> <b>Pawn</b>. It moves <b>forward one square</b> (or two on its first move), never backward. ' +
+      'Click the glowing pawn, then click a highlighted square to push it forward.',
+    setup: { board: { e2: 'P', ...K2 }, turn: 'white', mode: 'pvp' },
+    highlight: { from: 'e2' },
+    expect: (m) => m.from[0] === 6 && m.from[1] === 4,
+    success: '✓ That\'s a pawn push. Simple, but pawns win games.',
+  },
+  {
+    title: 'The Pawn captures sideways',
+    body: 'Here\'s the twist: a pawn <b>captures diagonally</b>, one square forward-left or forward-right. ' +
+      'Your pawn on e4 can take the black pawn on d5. Capture it!',
+    setup: { board: { e4: 'P', d5: 'p', ...K2 }, turn: 'white', mode: 'pvp' },
+    highlight: { from: 'e4', to: 'd5' },
+    expect: { from: 'e4', to: 'd5' },
+    success: '✓ Captured! Pawns attack on the diagonal, not straight ahead.',
+  },
+  {
+    title: 'The Rook — the castle',
+    body: 'The <span class="piece-glyph">♖</span> <b>Rook</b> moves in <b>straight lines</b> — any number of squares up, down, left, or right. ' +
+      'Slide the rook anywhere along its row or column.',
+    setup: { board: { d4: 'R', ...K2 }, turn: 'white', mode: 'pvp' },
+    highlight: { from: 'd4' },
+    expect: (m) => m.from[0] === 4 && m.from[1] === 3,
+    success: '✓ Rooks rule open rows and columns. Powerful in the endgame.',
+  },
+  {
+    title: 'The Bishop — the diagonal sniper',
+    body: 'The <span class="piece-glyph">♗</span> <b>Bishop</b> moves any distance, but only <b>diagonally</b>. ' +
+      'Each bishop stays on one color forever. Move it along a diagonal.',
+    setup: { board: { c1: 'B', ...K2 }, turn: 'white', mode: 'pvp' },
+    highlight: { from: 'c1' },
+    expect: (m) => m.from[0] === 7 && m.from[1] === 2,
+    success: '✓ Bishops love long, open diagonals.',
+  },
+  {
+    title: 'The Knight — the leaper',
+    body: 'The <span class="piece-glyph">♘</span> <b>Knight</b> moves in an <b>L-shape</b>: two squares one way, then one square sideways. ' +
+      'It\'s the only piece that can <b>jump over</b> others. Make a knight move.',
+    setup: { board: { d4: 'N', ...K2 }, turn: 'white', mode: 'pvp' },
+    highlight: { from: 'd4' },
+    expect: (m) => m.from[0] === 4 && m.from[1] === 3,
+    success: '✓ Tricky little horse. Knights are deadly in tight positions.',
+  },
+  {
+    title: 'The Queen — the powerhouse',
+    body: 'The <span class="piece-glyph">♕</span> <b>Queen</b> combines rook + bishop: she moves any distance <b>straight or diagonally</b>. ' +
+      'Your strongest piece — protect her! Move the queen.',
+    setup: { board: { d4: 'Q', ...K2 }, turn: 'white', mode: 'pvp' },
+    highlight: { from: 'd4' },
+    expect: (m) => m.from[0] === 4 && m.from[1] === 3,
+    success: '✓ The queen covers the whole board. Use her wisely.',
+  },
+  {
+    title: 'The King — protect at all costs',
+    body: 'The <span class="piece-glyph">♔</span> <b>King</b> moves <b>one square</b> in any direction. He\'s not strong, but he\'s everything: ' +
+      'lose him and you lose the game. Take one step with your king.',
+    setup: { board: { e4: 'K', e8: 'k' }, turn: 'white', mode: 'pvp' },
+    highlight: { from: 'e4' },
+    expect: (m) => m.from[0] === 4 && m.from[1] === 4,
+    success: '✓ Keep your king safe early, activate him late.',
+  },
+  {
+    title: 'Check & Checkmate',
+    body: 'When the king is under attack, that\'s <b>check</b> — you must escape it. ' +
+      'If there is <b>no</b> legal way to escape, that\'s <b>checkmate</b> and the game ends. ' +
+      'Ready to deliver your first one?',
+    setup: { board: { ...K2 }, turn: 'white', mode: 'pvp' },
+  },
+  {
+    title: 'Your first checkmate!',
+    body: 'The black king on g8 is boxed in by its own pawns. Your rook on a1 can slide to <b>a8</b> and attack along the back row. ' +
+      'The king can\'t flee and nothing can block. Play <b>Ra1 → a8</b> for <b>checkmate</b>!',
+    setup: { board: { a1: 'R', g1: 'K', g8: 'k', f7: 'p', g7: 'p', h7: 'p' }, turn: 'white', mode: 'pvp' },
+    highlight: { from: 'a1', to: 'a8' },
+    expect: { from: 'a1', to: 'a8' },
+    win: true,
+    success: '🏆 CHECKMATE! You just won your first game. That\'s the back-rank mate — a classic.',
+  },
+  {
+    title: 'Now play a real game',
+    body: 'You know every piece and how to win. Time to play! You\'re <b>White</b> vs a gentle <b>Beginner</b> computer. ' +
+      'Develop your pieces, watch for captures, and aim to trap the king. Stuck? Tap <b>💡 Hint</b> anytime.',
+    setup: { fresh: true, mode: 'pvc', difficulty: 'beginner', computerColor: 'black' },
+    sandbox: true,
+  },
+];
+
+Tutorial.SOOPOR = [
+  {
+    title: 'What makes it Soopor?',
+    body: 'Soopor Chess is normal chess <b>plus perks</b> — five one-time superpowers per player. ' +
+      'I\'ve flipped on <b>SUPER</b> mode, so the <b>⚡ Perks</b> panel is now showing. We\'ll try each one. ' +
+      '(New to chess itself? Do the <b>Chess 101</b> track first.)',
+    setup: { fresh: true, mode: 'pvp', super: true },
+  },
+  {
+    title: 'Perk: Pawn Sprint',
+    body: '<b>Pawn Sprint</b> lets a pawn rush <b>four squares</b> on its first move instead of two. ' +
+      'First click your <b>pawn</b> to select it, then click <b>Pawn Sprint</b> in the panel, then click the gold square.',
+    setup: { board: { e2: 'P', ...K2 }, turn: 'white', mode: 'pvp', super: true },
+    highlight: { from: 'e2', to: 'e6' },
+    expect: (m) => m.from[0] === 6 && m.from[1] === 4 && Math.abs(m.to[0] - m.from[0]) === 4,
+    success: '✓ Zoom! A four-square pawn jump — great for fast attacks.',
+    retry: 'Click the Pawn Sprint perk first, then move the pawn to the gold square.',
+  },
+  {
+    title: 'Perk: Double Turn',
+    body: '<b>Double Turn</b> lets you make <b>two moves in one turn</b> (any pieces except king & queen). ' +
+      'Click <b>Double Turn</b> in the panel, then move one knight, then the other. Press <b>Continue</b> when you\'ve tried it.',
+    setup: { board: { b1: 'N', g1: 'N', ...K2 }, turn: 'white', mode: 'pvp', super: true },
+  },
+  {
+    title: 'Perk: Firewall',
+    body: '<b>Firewall</b> shields one of your pieces so it <b>can\'t be captured</b> for a turn. ' +
+      'Click <b>Firewall</b>, then click your rook to protect it (watch it glow). Press <b>Continue</b> after.',
+    setup: { board: { d4: 'R', a4: 'r', ...K2 }, turn: 'white', mode: 'pvp', super: true },
+  },
+  {
+    title: 'Perk: Scan',
+    body: '<b>Scan</b> briefly lights up <b>every square the enemy can capture on</b> — perfect for spotting danger. ' +
+      'Click <b>Scan</b> and watch the board flash the threats. Press <b>Continue</b> after.',
+    setup: { board: { d4: 'R', d5: 'p', e5: 'p', ...K2 }, turn: 'white', mode: 'pvp', super: true },
+  },
+  {
+    title: 'Perk: Pawn Recall',
+    body: '<b>Pawn Recall</b> drops a fresh pawn in the center <b>and</b> brings back one captured piece. ' +
+      'I\'ve given you a captured queen. Click <b>Pawn Recall</b>, then click a glowing center square. Press <b>Continue</b> after.',
+    setup: { board: { e1: 'K', e8: 'k', a1: 'R' }, turn: 'white', mode: 'pvp', super: true },
+    onEnter() { capturedByWhite = ['q']; render(); },
+  },
+  {
+    title: 'Win with your perks!',
+    body: 'You\'ve met all five perks. Now play a full <b>SUPER</b> game vs a <b>Beginner</b> computer and use a perk to seal the win. ' +
+      'Tap <b>💡 Hint</b> if you get stuck, and remember: each perk works only once!',
+    setup: { fresh: true, mode: 'pvc', difficulty: 'beginner', computerColor: 'black', super: true },
+    sandbox: true,
+  },
+];
+
+/* ── Tutorial wiring ── */
+window.Tutorial = Tutorial; // expose for debugging / external triggers
+const welcomeOverlay = document.getElementById('welcomeOverlay');
+document.getElementById('btnLearnRegular').addEventListener('click', () => Tutorial.start('regular'));
+document.getElementById('btnLearnSoopor').addEventListener('click', () => Tutorial.start('soopor'));
+document.getElementById('btnSkipTutorial').addEventListener('click', () => {
+  welcomeOverlay.classList.remove('active');
+  try { localStorage.setItem('soopor_tut_seen', '1'); } catch (e) {}
+});
+document.getElementById('btnTutorial').addEventListener('click', () => {
+  if (Tutorial.active) { Tutorial.exit(); newGame(); return; }
+  welcomeOverlay.classList.add('active');
+});
+
 /* ── Init ── */
-buildPerkGrid();
-render();
+if (!window.__inited) {
+  window.__inited = true;
+  buildPerkGrid();
+  render();
+  let seen = false;
+  try { seen = !!localStorage.getItem('soopor_tut_seen'); } catch (e) {}
+  if (!seen) welcomeOverlay.classList.add('active');
+}
 </script>
 </body>
 </html>

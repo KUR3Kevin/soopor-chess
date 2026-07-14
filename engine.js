@@ -33,6 +33,53 @@ class ChessEngine {
     this._fullmoveNumber = 1;
     this._history = []; // stack of move records for undo
     this._moveLog = []; // chronological list of moves for getMoveHistory()
+    this._repetition = new Map(); // FEN-without-clocks -> count for threefold
+    this._recordPosition();
+  }
+
+  /** Directly set the side to move. */
+  setTurn(color) {
+    if (color === 'white' || color === 'black') this._turn = color;
+  }
+
+  /** Replace a single board square. */
+  setPiece(row, col, piece) {
+    if (!this._inBounds(row, col)) return false;
+    this._history.push({
+      action: 'setPiece',
+      logMove: false,
+      board: this._board.map(r => [...r]),
+      turn: this._turn,
+      castling: { ...this._castling },
+      enPassantTarget: this._enPassantTarget ? [...this._enPassantTarget] : null,
+      halfmoveClock: this._halfmoveClock,
+      fullmoveNumber: this._fullmoveNumber,
+      repetition: new Map(this._repetition),
+    });
+    this._board[row][col] = piece || null;
+    this._resetRepetitionTracking();
+    return true;
+  }
+
+  /** Swap two board squares in place. */
+  swapPieces(aRow, aCol, bRow, bCol) {
+    if (!this._inBounds(aRow, aCol) || !this._inBounds(bRow, bCol)) return false;
+    this._history.push({
+      action: 'swapPieces',
+      logMove: false,
+      board: this._board.map(r => [...r]),
+      turn: this._turn,
+      castling: { ...this._castling },
+      enPassantTarget: this._enPassantTarget ? [...this._enPassantTarget] : null,
+      halfmoveClock: this._halfmoveClock,
+      fullmoveNumber: this._fullmoveNumber,
+      repetition: new Map(this._repetition),
+    });
+    const temp = this._board[aRow][aCol];
+    this._board[aRow][aCol] = this._board[bRow][bCol];
+    this._board[bRow][bCol] = temp;
+    this._resetRepetitionTracking();
+    return true;
   }
 
   // ------------------------------------------------------------------
@@ -42,6 +89,25 @@ class ChessEngine {
   /** Return a deep copy of the 8×8 board array. */
   getBoard() {
     return this._board.map(r => [...r]);
+  }
+
+  /**
+   * Return an independent copy of the engine for AI search. The clone starts
+   * with empty undo/move logs so a search can make and undo moves freely
+   * without ever mutating the live game state.
+   */
+  clone() {
+    const e = new ChessEngine();
+    e._board = this._board.map(r => [...r]);
+    e._turn = this._turn;
+    e._castling = { ...this._castling };
+    e._enPassantTarget = this._enPassantTarget ? [...this._enPassantTarget] : null;
+    e._halfmoveClock = this._halfmoveClock;
+    e._fullmoveNumber = this._fullmoveNumber;
+    e._history = [];
+    e._moveLog = [];
+    e._repetition = new Map(this._repetition);
+    return e;
   }
 
   /**
@@ -64,6 +130,17 @@ class ChessEngine {
    */
   getAllLegalMoves(color) {
     if (color !== this._turn) return [];
+    return this.getAllLegalMovesFor(color);
+  }
+
+  /**
+   * Return all legal moves for the given color regardless of whose turn it is.
+   * This is used by UI features that need hypothetical move generation.
+   */
+  getAllLegalMovesFor(color) {
+    if (color !== 'white' && color !== 'black') return [];
+    const savedTurn = this._turn;
+    this._turn = color;
     const moves = [];
     for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 8; c++) {
@@ -73,15 +150,17 @@ class ChessEngine {
         }
       }
     }
+    this._turn = savedTurn;
     return moves;
   }
 
   /**
    * Apply a move and update the engine state.
    * @param {Object} move  { from: [r,c], to: [r,c], promotionPiece?: 'Q'|'R'|'B'|'N' }
+   * @param {Object} [options]  keepTurn?: boolean
    * @returns {boolean} true if the move was made, false if illegal.
    */
-  makeMove(move) {
+  makeMove(move, options = {}) {
     const [fr, fc] = move.from;
     const [tr, tc] = move.to;
     const piece = this._board[fr][fc];
@@ -97,15 +176,16 @@ class ChessEngine {
     // If promotion is required, use provided promotionPiece or default 'Q'
     let promotionPiece = match.promotionPiece || 'Q';
     if (move.promotionPiece) {
-      // Validate promotion piece
       const upper = move.promotionPiece.toUpperCase();
-      if (!['Q', 'R', 'B', 'N'].includes(upper)) {
+      if (['Q', 'R', 'B', 'N'].includes(upper)) {
         promotionPiece = upper;
       }
     }
 
     // Save state for undo
     this._history.push({
+      action: 'move',
+      logMove: true,
       move: { from: [fr, fc], to: [tr, tc], promotionPiece },
       board: this._board.map(r => [...r]),
       turn: this._turn,
@@ -113,10 +193,41 @@ class ChessEngine {
       enPassantTarget: this._enPassantTarget ? [...this._enPassantTarget] : null,
       halfmoveClock: this._halfmoveClock,
       fullmoveNumber: this._fullmoveNumber,
+      repetition: new Map(this._repetition),
     });
 
-    this._applyMove(fr, fc, tr, tc, promotionPiece);
+    this._applyMove(fr, fc, tr, tc, promotionPiece, options);
     this._moveLog.push(this._history[this._history.length - 1].move);
+    this._recordPosition();
+    return true;
+  }
+
+  /** Force a move without legality validation. Useful for special abilities. */
+  forceMove(move, options = {}) {
+    const [fr, fc] = move.from;
+    const [tr, tc] = move.to;
+    const piece = this._board[fr][fc];
+    if (!piece) return false;
+    const color = this._pieceColor(piece);
+    if (color !== this._turn) return false;
+
+    const promotionPiece = move.promotionPiece || null;
+    this._history.push({
+      action: 'forceMove',
+      logMove: true,
+      move: { from: [fr, fc], to: [tr, tc], promotionPiece },
+      board: this._board.map(r => [...r]),
+      turn: this._turn,
+      castling: { ...this._castling },
+      enPassantTarget: this._enPassantTarget ? [...this._enPassantTarget] : null,
+      halfmoveClock: this._halfmoveClock,
+      fullmoveNumber: this._fullmoveNumber,
+      repetition: new Map(this._repetition),
+    });
+
+    this._applyMove(fr, fc, tr, tc, promotionPiece || 'Q', options);
+    this._moveLog.push(this._history[this._history.length - 1].move);
+    this._recordPosition();
     return true;
   }
 
@@ -130,8 +241,9 @@ class ChessEngine {
     this._enPassantTarget = state.enPassantTarget;
     this._halfmoveClock = state.halfmoveClock;
     this._fullmoveNumber = state.fullmoveNumber;
-    this._moveLog.pop();
-    return state.move;
+    this._repetition = new Map(state.repetition || []);
+    if (state.logMove) this._moveLog.pop();
+    return state.move || null;
   }
 
   /** Is the given color currently in check? */
@@ -205,6 +317,73 @@ class ChessEngine {
     }
 
     return `${piecePlacement} ${activeColor} ${castling} ${ep} ${this._halfmoveClock} ${this._fullmoveNumber}`;
+  }
+
+  /** Is the current position a fifty-move draw? */
+  isFiftyMoveDraw() {
+    return this._halfmoveClock >= 100;
+  }
+
+  /** Has the current position occurred three times? */
+  isThreefoldRepetitionDraw() {
+    const key = this._positionKey();
+    return (this._repetition.get(key) || 0) >= 3;
+  }
+
+  /** Is there insufficient material left to force checkmate? */
+  isInsufficientMaterial() {
+    const pieces = [];
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const p = this._board[r][c];
+        if (p) pieces.push({ p, r, c });
+      }
+    }
+
+    const nonKings = pieces.filter(x => x.p.toLowerCase() !== 'k');
+    if (nonKings.length === 0) return true;
+
+    const counts = nonKings.reduce((acc, { p }) => {
+      const key = p.toLowerCase();
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+
+    // FIX: treat all bare-minor-piece dead positions as draws, not just K+B/N vs K.
+    // No pawns, rooks, or queens means checkmate is impossible unless the side has
+    // enough minors to construct mate (e.g. bishop pair on opposite colors, 2N+K, etc.).
+    if (counts.p || counts.r || counts.q) return false;
+
+    const minors = nonKings.map(x => x.p.toLowerCase());
+    if (minors.length === 1) return true;
+    if (minors.length === 2) {
+      if (minors.every(p => p === 'n')) return true; // K+N vs K+N or K+2N vs K
+      if (minors.every(p => p === 'b')) {
+        const colorA = (nonKings[0].r + nonKings[0].c) % 2;
+        const colorB = (nonKings[1].r + nonKings[1].c) % 2;
+        return colorA === colorB;
+      }
+      return true; // K+B vs K+N is dead
+    }
+    if (minors.length === 3) {
+      // K+2N vs K is dead; any 3-minor combo without pawns/rooks/queens is dead here.
+      if (minors.filter(p => p === 'n').length === 2 && minors.filter(p => p === 'b').length === 0) return true;
+      return false;
+    }
+    if (minors.length >= 4) {
+      // Very conservative: once only minors remain and neither side has pawns/rooks/queens,
+      // treat it as insufficient if no mating material is evident.
+      const bishopSquaresByColor = minors.filter(p => p === 'b').map((_, i) => (nonKings[i].r + nonKings[i].c) % 2);
+      if (minors.every(p => p === 'n')) return true;
+      if (minors.every(p => p === 'b')) return bishopSquaresByColor.every(c => c === bishopSquaresByColor[0]);
+    }
+
+    return false;
+  }
+
+  /** Is the current position a draw by any standard rule supported by the engine? */
+  isDraw() {
+    return this.isFiftyMoveDraw() || this.isThreefoldRepetitionDraw() || this.isInsufficientMaterial() || this.isStalemate(this._turn);
   }
 
   // ------------------------------------------------------------------
@@ -526,11 +705,12 @@ class ChessEngine {
    * Apply a move to the board. Does NOT validate legality.
    * Handles normal moves, captures, castling, en passant, promotion.
    */
-  _applyMove(fr, fc, tr, tc, promotionPiece) {
+  _applyMove(fr, fc, tr, tc, promotionPiece, options = {}) {
     const piece = this._board[fr][fc];
     const lower = piece.toLowerCase();
     const color = this._pieceColor(piece);
     const captured = this._board[tr][tc];
+    const keepTurn = !!options.keepTurn;
 
     // Save for undo is handled by caller
 
@@ -558,7 +738,8 @@ class ChessEngine {
 
     // Promotion
     if (lower === 'p' && (tr === 0 || tr === 7)) {
-      const promoChar = color === 'white' ? promotionPiece.toUpperCase() : promotionPiece.toLowerCase();
+      const promo = ['Q', 'R', 'B', 'N'].includes((promotionPiece || 'Q').toUpperCase()) ? promotionPiece.toUpperCase() : 'Q';
+      const promoChar = color === 'white' ? promo : promo.toLowerCase();
       this._board[tr][tc] = promoChar;
     }
 
@@ -594,12 +775,49 @@ class ChessEngine {
     }
 
     // Update fullmove number
-    if (color === 'black') {
+    if (color === 'black' && !keepTurn) {
       this._fullmoveNumber++;
     }
 
     // Switch turn
-    this._turn = this._opponent(color);
+    if (!keepTurn) this._turn = this._opponent(color);
+  }
+
+  _positionKey() {
+    const rows = [];
+    for (let r = 0; r < 8; r++) {
+      let empty = 0;
+      let rowStr = '';
+      for (let c = 0; c < 8; c++) {
+        const p = this._board[r][c];
+        if (p) {
+          if (empty > 0) { rowStr += empty; empty = 0; }
+          rowStr += p;
+        } else {
+          empty++;
+        }
+      }
+      if (empty > 0) rowStr += empty;
+      rows.push(rowStr);
+    }
+    let castling = '';
+    if (this._castling.K) castling += 'K';
+    if (this._castling.Q) castling += 'Q';
+    if (this._castling.k) castling += 'k';
+    if (this._castling.q) castling += 'q';
+    if (castling === '') castling = '-';
+    const ep = this._enPassantTarget ? this._coordToAlgebraic(this._enPassantTarget[0], this._enPassantTarget[1]) : '-';
+    const activeColor = this._turn === 'white' ? 'w' : 'b';
+    return `${rows.join('/')} ${activeColor} ${castling} ${ep}`;
+  }
+
+  _recordPosition() {
+    const key = this._positionKey();
+    this._repetition.set(key, (this._repetition.get(key) || 0) + 1);
+  }
+
+  _resetRepetitionTracking() {
+    this._repetition = new Map([[this._positionKey(), 1]]);
   }
 
   // ------------------------------------------------------------------
@@ -614,6 +832,7 @@ class ChessEngine {
       enPassantTarget: this._enPassantTarget ? [...this._enPassantTarget] : null,
       halfmoveClock: this._halfmoveClock,
       fullmoveNumber: this._fullmoveNumber,
+      repetition: new Map(this._repetition),
     };
   }
 
@@ -624,11 +843,14 @@ class ChessEngine {
     this._enPassantTarget = s.enPassantTarget;
     this._halfmoveClock = s.halfmoveClock;
     this._fullmoveNumber = s.fullmoveNumber;
+    this._repetition = new Map(s.repetition || []);
   }
 }
 
-// Export for both CommonJS and ES module environments
+// Export for CommonJS and attach to the browser global.
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { ChessEngine };
 }
-export { ChessEngine };
+if (typeof window !== 'undefined') {
+  window.ChessEngine = ChessEngine;
+}
