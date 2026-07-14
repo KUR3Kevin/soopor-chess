@@ -1,0 +1,8 @@
+{
+  "name": "soopor-chess",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}

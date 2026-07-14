@@ -64,12 +64,22 @@ class ChessEngine {
    */
   getAllLegalMoves(color) {
     if (color !== this._turn) return [];
+    return this.getAllLegalMovesFor(color);
+  }
+
+  /**
+   * Return legal moves for a color without requiring it to be that color's turn.
+   * This supports analysis features such as the computer player and Scan.
+   */
+  getAllLegalMovesFor(color) {
+    if (color !== 'white' && color !== 'black') return [];
     const moves = [];
     for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 8; c++) {
         const p = this._board[r][c];
         if (p && this._pieceColor(p) === color) {
-          moves.push(...this.getLegalMoves(r, c));
+          const pseudo = this._pseudoMoves(r, c, p);
+          moves.push(...pseudo.filter(move => this._isLegalAfterMove(move, color)));
         }
       }
     }
@@ -79,11 +89,14 @@ class ChessEngine {
   /**
    * Apply a move and update the engine state.
    * @param {Object} move  { from: [r,c], to: [r,c], promotionPiece?: 'Q'|'R'|'B'|'N' }
+   * @param {Object} options  Variant options. retainTurn keeps the moving side active.
    * @returns {boolean} true if the move was made, false if illegal.
    */
-  makeMove(move) {
+  makeMove(move, { retainTurn = false } = {}) {
+    if (!move || !Array.isArray(move.from) || !Array.isArray(move.to)) return false;
     const [fr, fc] = move.from;
     const [tr, tc] = move.to;
+    if (!this._inBounds(fr, fc) || !this._inBounds(tr, tc)) return false;
     const piece = this._board[fr][fc];
     if (!piece) return false;
     const color = this._pieceColor(piece);
@@ -91,22 +104,30 @@ class ChessEngine {
 
     // Validate against legal moves
     const legals = this.getLegalMoves(fr, fc);
-    const match = legals.find(m => m.to[0] === tr && m.to[1] === tc);
-    if (!match) return false;
+    const candidates = legals.filter(m => m.to[0] === tr && m.to[1] === tc);
+    if (candidates.length === 0) return false;
 
-    // If promotion is required, use provided promotionPiece or default 'Q'
-    let promotionPiece = match.promotionPiece || 'Q';
-    if (move.promotionPiece) {
-      // Validate promotion piece
-      const upper = move.promotionPiece.toUpperCase();
-      if (!['Q', 'R', 'B', 'N'].includes(upper)) {
-        promotionPiece = upper;
-      }
+    const promotionCandidates = candidates.filter(m => m.promotionPiece);
+    let promotionPiece;
+    let match;
+    if (promotionCandidates.length > 0) {
+      promotionPiece = (move.promotionPiece || 'Q').toUpperCase();
+      if (!['Q', 'R', 'B', 'N'].includes(promotionPiece)) return false;
+      match = promotionCandidates.find(m => m.promotionPiece === promotionPiece);
+      if (!match) return false;
+    } else {
+      if (move.promotionPiece) return false;
+      match = candidates[0];
     }
+
+    const loggedMove = { from: [fr, fc], to: [tr, tc] };
+    if (promotionPiece) loggedMove.promotionPiece = promotionPiece;
+    if (match.castling) loggedMove.castling = match.castling;
+    if (retainTurn) loggedMove.retainTurn = true;
 
     // Save state for undo
     this._history.push({
-      move: { from: [fr, fc], to: [tr, tc], promotionPiece },
+      move: loggedMove,
       board: this._board.map(r => [...r]),
       turn: this._turn,
       castling: { ...this._castling },
@@ -116,7 +137,55 @@ class ChessEngine {
     });
 
     this._applyMove(fr, fc, tr, tc, promotionPiece);
+    if (retainTurn) {
+      this._turn = color;
+      if (color === 'black') this._fullmoveNumber--;
+    }
     this._moveLog.push(this._history[this._history.length - 1].move);
+    return true;
+  }
+
+  /** End a retained variant turn when no follow-up move is available. */
+  completeTurn() {
+    const color = this._turn;
+    this._turn = this._opponent(color);
+    if (color === 'black') this._fullmoveNumber++;
+  }
+
+  /** Restore a non-king piece for a variant ability without consuming the turn. */
+  restorePiece(piece, row, col) {
+    if (!this._inBounds(row, col) || this._board[row][col]) return false;
+    if (typeof piece !== 'string' || !/^[qrbnpQRBNP]$/.test(piece)) return false;
+    if (this._pieceColor(piece) !== this._turn) return false;
+    this._board[row][col] = piece;
+    return true;
+  }
+
+  /** Swap two current-player pieces for a variant ability without consuming the turn. */
+  swapPieces(first, second) {
+    if (!Array.isArray(first) || !Array.isArray(second)) return false;
+    const [firstRow, firstCol] = first;
+    const [secondRow, secondCol] = second;
+    if (!this._inBounds(firstRow, firstCol) || !this._inBounds(secondRow, secondCol)) return false;
+    if (Math.abs(firstRow - secondRow) + Math.abs(firstCol - secondCol) !== 1) return false;
+
+    const firstPiece = this._board[firstRow][firstCol];
+    const secondPiece = this._board[secondRow][secondCol];
+    if (!firstPiece || !secondPiece) return false;
+    if (this._pieceColor(firstPiece) !== this._turn || this._pieceColor(secondPiece) !== this._turn) return false;
+
+    const savedCastling = { ...this._castling };
+    this._board[firstRow][firstCol] = secondPiece;
+    this._board[secondRow][secondCol] = firstPiece;
+    this._disableCastlingForVariantMove(firstPiece, firstRow, firstCol);
+    this._disableCastlingForVariantMove(secondPiece, secondRow, secondCol);
+
+    if (this.isInCheck(this._turn)) {
+      this._board[firstRow][firstCol] = firstPiece;
+      this._board[secondRow][secondCol] = secondPiece;
+      this._castling = savedCastling;
+      return false;
+    }
     return true;
   }
 
@@ -246,6 +315,25 @@ class ChessEngine {
   /** Convert a row, col to algebraic notation (e.g., 'e4'). */
   _coordToAlgebraic(r, c) {
     return String.fromCharCode(97 + c) + (8 - r);
+  }
+
+  _disableCastlingForVariantMove(piece, row, col) {
+    const color = this._pieceColor(piece);
+    if (piece.toLowerCase() === 'k') {
+      if (color === 'white') {
+        this._castling.K = false;
+        this._castling.Q = false;
+      } else {
+        this._castling.k = false;
+        this._castling.q = false;
+      }
+    }
+    if (piece.toLowerCase() === 'r') {
+      if (row === 7 && col === 0) this._castling.Q = false;
+      if (row === 7 && col === 7) this._castling.K = false;
+      if (row === 0 && col === 0) this._castling.q = false;
+      if (row === 0 && col === 7) this._castling.k = false;
+    }
   }
 
   // ------------------------------------------------------------------
