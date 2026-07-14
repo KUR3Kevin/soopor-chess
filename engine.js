@@ -91,22 +91,29 @@ class ChessEngine {
 
     // Validate against legal moves
     const legals = this.getLegalMoves(fr, fc);
-    const match = legals.find(m => m.to[0] === tr && m.to[1] === tc);
-    if (!match) return false;
+    const candidates = legals.filter(m => m.to[0] === tr && m.to[1] === tc);
+    if (candidates.length === 0) return false;
 
-    // If promotion is required, use provided promotionPiece or default 'Q'
-    let promotionPiece = match.promotionPiece || 'Q';
-    if (move.promotionPiece) {
-      // Validate promotion piece
-      const upper = move.promotionPiece.toUpperCase();
-      if (!['Q', 'R', 'B', 'N'].includes(upper)) {
-        promotionPiece = upper;
-      }
+    const promotionCandidates = candidates.filter(m => m.promotionPiece);
+    let promotionPiece;
+    let match;
+    if (promotionCandidates.length > 0) {
+      promotionPiece = (move.promotionPiece || 'Q').toUpperCase();
+      if (!['Q', 'R', 'B', 'N'].includes(promotionPiece)) return false;
+      match = promotionCandidates.find(m => m.promotionPiece === promotionPiece);
+      if (!match) return false;
+    } else {
+      if (move.promotionPiece) return false;
+      match = candidates[0];
     }
+
+    const loggedMove = { from: [fr, fc], to: [tr, tc] };
+    if (promotionPiece) loggedMove.promotionPiece = promotionPiece;
+    if (match.castling) loggedMove.castling = match.castling;
 
     // Save state for undo
     this._history.push({
-      move: { from: [fr, fc], to: [tr, tc], promotionPiece },
+      move: loggedMove,
       board: this._board.map(r => [...r]),
       turn: this._turn,
       castling: { ...this._castling },
