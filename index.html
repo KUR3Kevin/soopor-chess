@@ -129,6 +129,40 @@ body {
 .white-turn .turn-dot { background: #e0e0f0; box-shadow: 0 0 8px rgba(255,255,255,0.5); }
 .black-turn .turn-dot { background: #333; box-shadow: 0 0 4px rgba(0,0,0,0.5); }
 
+.game-mode {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.mode-btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-dim);
+  padding: 6px 12px;
+  cursor: pointer;
+  font: 600 0.62rem/1 'SF Mono', 'Fira Code', monospace;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  transition: all var(--transition);
+}
+.mode-btn:hover { border-color: var(--violet); color: var(--text); }
+.mode-btn.active {
+  border-color: var(--cyan);
+  color: var(--text-bright);
+  background: rgba(6,182,212,0.1);
+  box-shadow: 0 0 14px rgba(6,182,212,0.12);
+}
+.mode-status {
+  margin-top: 5px;
+  color: var(--text-dim);
+  font: 0.55rem/1.2 'SF Mono', 'Fira Code', monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
 /* ═══════════════════════════════════════════
    MAIN LAYOUT
    ═══════════════════════════════════════════ */
@@ -175,6 +209,8 @@ body {
     inset 0 0 60px rgba(0,0,0,0.3);
   position: relative;
 }
+.board.computer-turn { cursor: progress; }
+.board.computer-turn .square { cursor: progress; }
 .board::before {
   content: '';
   position: absolute;
@@ -434,6 +470,7 @@ body {
 .btn:hover { border-color: var(--violet); box-shadow: 0 0 14px var(--violet-glow2); }
 .btn:hover::before { opacity: 1; }
 .btn:active { transform: scale(0.96); }
+.btn:disabled { cursor: not-allowed; opacity: 0.4; box-shadow: none; }
 
 /* ═══════════════════════════════════════════
    SUPER TOGGLE
@@ -457,6 +494,8 @@ body {
 .super-label.active { color: var(--gold); text-shadow: 0 0 8px var(--gold-glow); }
 
 .super-switch {
+  appearance: none;
+  padding: 0;
   width: 44px;
   height: 22px;
   border-radius: 11px;
@@ -800,9 +839,14 @@ body.super-mode .perk-reveal.open {
     <span class="turn-dot"></span>
     <span id="turnText">White's Turn</span>
   </div>
+  <div class="game-mode" role="group" aria-label="Game mode">
+    <button class="mode-btn active" id="modePvp" type="button" aria-pressed="true">Player vs Player</button>
+    <button class="mode-btn" id="modePvc" type="button" aria-pressed="false">Player vs Computer</button>
+  </div>
+  <div class="mode-status" id="modeStatus">Local two-player game</div>
   <div class="super-toggle">
     <span class="super-label" id="superLabel">CLASSIC</span>
-    <div class="super-switch" id="superSwitch" title="Toggle SUPER mode"></div>
+    <button class="super-switch" id="superSwitch" type="button" title="Toggle SUPER mode" aria-label="Toggle SUPER mode" aria-pressed="false"></button>
     <span class="super-label" id="superLabelR">SUPER</span>
   </div>
 </div>
@@ -877,6 +921,7 @@ body.super-mode .perk-reveal.open {
 
 <script type="module">
 import { ChessEngine } from './engine.js';
+import { chooseComputerMove } from './computer.js';
 
 /* ═══════════════════════════════════════════
    PERK DEFINITIONS
@@ -984,9 +1029,17 @@ const PIECE_CHARS = {
   'K':'♔','Q':'♕','R':'♖','B':'♗','N':'♘','P':'♙',
   'k':'♚','q':'♛','r':'♜','b':'♝','n':'♞','p':'♟'
 };
+const PIECE_NAMES = {
+  'K':'white king','Q':'white queen','R':'white rook','B':'white bishop','N':'white knight','P':'white pawn',
+  'k':'black king','q':'black queen','r':'black rook','b':'black bishop','n':'black knight','p':'black pawn'
+};
 const PIECE_VALUES = { p:1, n:3, b:3, r:5, q:9, k:0 };
+const COMPUTER_COLOR = 'black';
 
 let engine = new ChessEngine();
+let gameMode = 'pvp';
+let computerThinking = false;
+let computerTimer = null;
 let selectedSquare = null;
 let legalMoves = [];
 let lastMove = null;
@@ -998,9 +1051,11 @@ let superMode = false;
 let activePerk = null;
 let perkTargets = [];
 let shieldedSquare = null;
+let shieldOwner = null;
 let scanHighlight = null;
 let scanTimeout = null;
 let overclockKnight = null;
+let overclockSecondMove = false;
 let glitchFirst = null;
 
 const perkSystem = new PerkSystem();
@@ -1027,6 +1082,11 @@ const superSwitch = document.getElementById('superSwitch');
 const superBadge = document.getElementById('superBadge');
 const superLabel = document.getElementById('superLabel');
 const superLabelR = document.getElementById('superLabelR');
+const modePvp = document.getElementById('modePvp');
+const modePvc = document.getElementById('modePvc');
+const modeStatus = document.getElementById('modeStatus');
+const btnUndo = document.getElementById('btnUndo');
+const btnResign = document.getElementById('btnResign');
 
 /* ── Init Labels ── */
 for (let i = 8; i >= 1; i--) {
@@ -1049,7 +1109,16 @@ for (let r = 0; r < 8; r++) {
     sq.classList.add('square', (r + c) % 2 === 0 ? 'light' : 'dark');
     sq.dataset.row = r;
     sq.dataset.col = c;
+    sq.dataset.square = coordToAlg(r, c);
+    sq.setAttribute('role', 'button');
+    sq.setAttribute('tabindex', '0');
     sq.addEventListener('click', () => onSquareClick(r, c));
+    sq.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        onSquareClick(r, c);
+      }
+    });
     boardEl.appendChild(sq);
     squareEls[r][c] = sq;
   }
@@ -1129,7 +1198,6 @@ function showPerkTooltip(e, perkId) {
   const perk = PERKS.find(p => p.id === perkId);
   if (!perk) return;
   const turn = engine.getTurn();
-  const charges = perkSystem.getPerkState(perkId) || { current: 0 };
   document.getElementById('ttName').textContent = `${perk.icon} ${perk.name}`;
   document.getElementById('ttDesc').textContent = perk.desc;
   const ready = perkSystem.canUse(turn, perk);
@@ -1146,6 +1214,18 @@ function hidePerkTooltip() {
 }
 
 /* ═══════════════════════════════════════════
+   GAME MODE
+   ═══════════════════════════════════════════ */
+modePvp.addEventListener('click', () => setGameMode('pvp'));
+modePvc.addEventListener('click', () => setGameMode('pvc'));
+
+function setGameMode(mode) {
+  if (mode !== 'pvp' && mode !== 'pvc') return;
+  gameMode = mode;
+  newGame();
+}
+
+/* ═══════════════════════════════════════════
    SUPER MODE TOGGLE
    ═══════════════════════════════════════════ */
 superSwitch.addEventListener('click', () => {
@@ -1156,6 +1236,7 @@ superSwitch.addEventListener('click', () => {
   superLabelR.classList.toggle('active', superMode);
   superBadge.classList.toggle('visible', superMode);
   perkReveal.classList.toggle('open', superMode);
+  superSwitch.setAttribute('aria-pressed', String(superMode));
   if (!superMode && activePerk) cancelPerk();
   updatePerkGrid();
 });
@@ -1199,7 +1280,7 @@ function onPerkClick(perkId) {
       const kc = turn === 'white' ? 'N' : 'n';
       for (let r = 0; r < 8; r++)
         for (let c = 0; c < 8; c++)
-          if (board[r][c] === kc) perkTargets.push([r, c]);
+          if (board[r][c] === kc && engine.getLegalMoves(r, c).length > 0) perkTargets.push([r, c]);
       break;
     }
     case 'glitch': {
@@ -1224,7 +1305,7 @@ function onPerkClick(perkId) {
       // Instant — no target selection needed
       perkSystem.use(turn, perk);
       const oppColor = turn === 'white' ? 'black' : 'white';
-      const oppMoves = engine.getAllLegalMoves(oppColor);
+      const oppMoves = engine.getAllLegalMovesFor(oppColor);
       const captures = oppMoves.filter(m => board[m.to[0]][m.to[1]]);
       if (captures.length > 0) {
         const best = captures.sort((a, b) => {
@@ -1266,9 +1347,27 @@ function cancelPerk() {
 function render() {
   const board = engine.getBoard();
   const turn = engine.getTurn();
+  const isComputerTurn = gameMode === 'pvc' && turn === COMPUTER_COLOR && !gameOver;
 
-  turnTextEl.textContent = turn === 'white' ? "White's Turn" : "Black's Turn";
+  if (gameMode === 'pvc') {
+    turnTextEl.textContent = isComputerTurn
+      ? (computerThinking ? 'Computer Thinking…' : "Computer's Turn")
+      : 'Your Turn';
+  } else {
+    turnTextEl.textContent = turn === 'white' ? "White's Turn" : "Black's Turn";
+  }
   turnIndicatorEl.className = `turn-badge ${turn === 'white' ? 'white-turn' : 'black-turn'}`;
+  modePvp.classList.toggle('active', gameMode === 'pvp');
+  modePvc.classList.toggle('active', gameMode === 'pvc');
+  modePvp.setAttribute('aria-pressed', String(gameMode === 'pvp'));
+  modePvc.setAttribute('aria-pressed', String(gameMode === 'pvc'));
+  modeStatus.textContent = gameMode === 'pvc'
+    ? 'You play White · Computer plays Black'
+    : 'Local two-player game';
+  boardEl.classList.toggle('computer-turn', isComputerTurn);
+  boardEl.setAttribute('aria-busy', String(computerThinking));
+  btnUndo.disabled = engine.getMoveHistory().length === 0;
+  btnResign.disabled = gameOver || computerThinking;
 
   let checkKingSq = null;
   if (engine.isInCheck(turn)) {
@@ -1282,8 +1381,11 @@ function render() {
     for (let c = 0; c < 8; c++) {
       const sq = squareEls[r][c];
       const piece = board[r][c];
+      const squareName = coordToAlg(r, c);
 
       sq.className = 'square ' + ((r + c) % 2 === 0 ? 'light' : 'dark');
+      sq.setAttribute('aria-label', `${squareName}: ${piece ? PIECE_NAMES[piece] : 'empty'}`);
+      sq.setAttribute('aria-disabled', String(gameOver || computerThinking || isComputerTurn));
 
       if (selectedSquare && selectedSquare[0] === r && selectedSquare[1] === c)
         sq.classList.add('selected');
@@ -1348,18 +1450,19 @@ function renderCaptured() {
 function renderMoveHistory() {
   const history = engine.getMoveHistory();
   moveHistoryEl.innerHTML = '';
-  for (let i = 0; i < history.length; i += 2) {
-    const moveNum = Math.floor(i / 2) + 1;
-    const wMove = history[i];
-    const bMove = history[i + 1] || null;
+  let movingColor = 'white';
+  for (let i = 0; i < history.length; i++) {
+    const move = history[i];
     const row = document.createElement('div');
     row.classList.add('move-row');
     row.innerHTML = `
-      <span class="move-num">${moveNum}.</span>
-      <span class="move-white">${toAlgebraic(wMove)}</span>
-      <span class="move-black">${bMove ? toAlgebraic(bMove) : ''}</span>
+      <span class="move-num">${i + 1}.</span>
+      <span class="${movingColor === 'white' ? 'move-white' : 'move-black'}">
+        ${movingColor === 'white' ? 'White' : 'Black'} · ${toAlgebraic(move)}
+      </span>
     `;
     moveHistoryEl.appendChild(row);
+    if (!move.retainTurn) movingColor = movingColor === 'white' ? 'black' : 'white';
   }
   moveHistoryEl.scrollTop = moveHistoryEl.scrollHeight;
 }
@@ -1378,7 +1481,8 @@ function coordToAlg(r, c) { return String.fromCharCode(97 + c) + (8 - r); }
    CLICK HANDLER
    ═══════════════════════════════════════════ */
 function onSquareClick(row, col) {
-  if (gameOver || pendingPromo) return;
+  if (gameOver || pendingPromo || computerThinking) return;
+  if (gameMode === 'pvc' && engine.getTurn() === COMPUTER_COLOR) return;
   const board = engine.getBoard();
   const piece = board[row][col];
   const turn = engine.getTurn();
@@ -1396,7 +1500,7 @@ function onSquareClick(row, col) {
           (PIECE_VALUES[b.toLowerCase()]||0) - (PIECE_VALUES[a.toLowerCase()]||0)
         )[0];
         const restorePiece = turn === 'white' ? best.toUpperCase() : best.toLowerCase();
-        board[row][col] = restorePiece;
+        if (!engine.restorePiece(restorePiece, row, col)) { cancelPerk(); return; }
         const idx = myCaptured.indexOf(best);
         if (idx >= 0) myCaptured.splice(idx, 1);
         perkSystem.use(turn, PERKS.find(p => p.id === 'recall'));
@@ -1404,13 +1508,21 @@ function onSquareClick(row, col) {
       }
       case 'firewall': {
         shieldedSquare = [row, col];
+        shieldOwner = turn;
         perkSystem.use(turn, PERKS.find(p => p.id === 'firewall'));
         break;
       }
       case 'overclock': {
         overclockKnight = [row, col];
+        overclockSecondMove = false;
         perkSystem.use(turn, PERKS.find(p => p.id === 'overclock'));
-        break;
+        activePerk = null;
+        perkTargets = [];
+        glitchFirst = null;
+        selectedSquare = [row, col];
+        legalMoves = engine.getLegalMoves(row, col);
+        render();
+        return;
       }
       case 'glitch': {
         if (!glitchFirst) {
@@ -1428,10 +1540,7 @@ function onSquareClick(row, col) {
           render();
           return;
         } else {
-          // Swap
-          const temp = board[glitchFirst[0]][glitchFirst[1]];
-          board[glitchFirst[0]][glitchFirst[1]] = board[row][col];
-          board[row][col] = temp;
+          if (!engine.swapPieces(glitchFirst, [row, col])) { cancelPerk(); return; }
           perkSystem.use(turn, PERKS.find(p => p.id === 'glitch'));
         }
         break;
@@ -1450,25 +1559,37 @@ function onSquareClick(row, col) {
   if (selectedSquare) {
     const moveMatch = legalMoves.find(m => m.to[0] === row && m.to[1] === col);
     if (moveMatch) {
-      // Shielded piece can't be captured
-      if (shieldedSquare && shieldedSquare[0] === row && shieldedSquare[1] === col && moveMatch.capture) {
-        clearSelection(); render(); return;
-      }
       if (moveMatch.promotionPiece) {
         pendingPromo = { from: [...selectedSquare], to: [row, col] };
         showPromotionModal(turn);
         return;
       }
       const sourceSquare = [...selectedSquare];
-      executeMove({ from: sourceSquare, to: [row, col] });
-
-      // Overclock: allow the same knight to move twice this turn.
-      if (overclockKnight && overclockKnight[0] === sourceSquare[0] && overclockKnight[1] === sourceSquare[1]) {
+      const isOverclockMove = overclockKnight &&
+        overclockKnight[0] === sourceSquare[0] && overclockKnight[1] === sourceSquare[1];
+      const isFirstOverclockMove = isOverclockMove && !overclockSecondMove;
+      const isSecondOverclockMove = isOverclockMove && overclockSecondMove;
+      if (isSecondOverclockMove) {
         overclockKnight = null;
+        overclockSecondMove = false;
+      }
+      const moved = executeMove(
+        { from: sourceSquare, to: [row, col] },
+        { retainTurn: isFirstOverclockMove }
+      );
+
+      if (moved && isFirstOverclockMove) {
+        overclockKnight = [row, col];
+        overclockSecondMove = true;
         selectedSquare = [row, col];
         legalMoves = engine.getLegalMoves(row, col);
-        activePerk = null;
-        perkTargets = [];
+        if (legalMoves.length === 0) {
+          overclockKnight = null;
+          overclockSecondMove = false;
+          engine.completeTurn();
+          selectedSquare = null;
+          finishTurn();
+        }
         render();
         return;
       }
@@ -1476,8 +1597,10 @@ function onSquareClick(row, col) {
     }
 
     if (selectedSquare[0] === row && selectedSquare[1] === col) {
+      if (overclockKnight) return;
       clearSelection(); return;
     }
+    if (overclockKnight) return;
     if (piece && isPieceColor(piece, turn)) {
       selectSquare(row, col); return;
     }
@@ -1509,15 +1632,17 @@ function isPieceColor(piece, color) {
 /* ═══════════════════════════════════════════
    EXECUTE MOVE
    ═══════════════════════════════════════════ */
-function executeMove(move) {
+function executeMove(move, { retainTurn = false } = {}) {
   const board = engine.getBoard();
   const targetPiece = board[move.to[0]][move.to[1]];
   const movingPiece = board[move.from[0]][move.from[1]];
+  if (!movingPiece) return false;
   const movingColor = movingPiece === movingPiece.toUpperCase() ? 'white' : 'black';
 
   // Shielded piece can't be captured
-  if (shieldedSquare && shieldedSquare[0] === move.to[0] && shieldedSquare[1] === move.to[1] && targetPiece) {
-    clearSelection(); render(); return;
+  if (shieldedSquare && shieldOwner !== movingColor &&
+      shieldedSquare[0] === move.to[0] && shieldedSquare[1] === move.to[1] && targetPiece) {
+    clearSelection(); render(); return false;
   }
 
   // Track captures
@@ -1537,31 +1662,72 @@ function executeMove(move) {
     }
   }
 
-  const success = engine.makeMove(move);
-  if (!success) { clearSelection(); return; }
+  const success = engine.makeMove(move, { retainTurn });
+  if (!success) { clearSelection(); return false; }
 
   // Update perk charges with correct board state
   perkSystem.onMoveMade(move, board, movingColor);
 
-  // Clear shield after opponent's turn completes
-  if (movingColor !== engine.getTurn()) {
+  if (shieldedSquare && shieldOwner === movingColor &&
+      shieldedSquare[0] === move.from[0] && shieldedSquare[1] === move.from[1]) {
+    shieldedSquare = [...move.to];
+  }
+
+  // The shield lasts through one complete opponent move.
+  if (shieldedSquare && shieldOwner && movingColor !== shieldOwner) {
     shieldedSquare = null;
+    shieldOwner = null;
   }
 
   lastMove = { from: [...move.from], to: [...move.to] };
   clearSelection();
 
-  // Check game over
+  if (retainTurn) render();
+  else finishTurn();
+  return true;
+}
+
+function finishTurn() {
   const nextTurn = engine.getTurn();
   if (engine.isCheckmate(nextTurn)) {
     gameOver = true;
-    showGameOver('checkmate', nextTurn === 'white' ? 'Black' : 'White');
+    const winner = nextTurn === 'white'
+      ? (gameMode === 'pvc' ? 'Computer' : 'Black')
+      : 'White';
+    showGameOver('checkmate', winner);
   } else if (engine.isStalemate(nextTurn)) {
     gameOver = true;
     showGameOver('stalemate', null);
   }
 
   render();
+  if (!gameOver) scheduleComputerMove();
+}
+
+function scheduleComputerMove() {
+  if (gameMode !== 'pvc' || gameOver || pendingPromo || engine.getTurn() !== COMPUTER_COLOR) return;
+  if (computerTimer) clearTimeout(computerTimer);
+  computerThinking = true;
+  render();
+  computerTimer = setTimeout(() => {
+    computerTimer = null;
+    const candidates = engine.getAllLegalMoves(COMPUTER_COLOR).filter(move =>
+      !shieldedSquare || move.to[0] !== shieldedSquare[0] || move.to[1] !== shieldedSquare[1]
+    );
+    const move = chooseComputerMove(engine, candidates);
+    computerThinking = false;
+    if (move) executeMove(move);
+    else {
+      engine.completeTurn();
+      finishTurn();
+    }
+  }, 250);
+}
+
+function cancelComputerMove() {
+  if (computerTimer) clearTimeout(computerTimer);
+  computerTimer = null;
+  computerThinking = false;
 }
 
 /* ═══════════════════════════════════════════
@@ -1577,8 +1743,13 @@ function showPromotionModal(turn) {
     btn.title = p;
     btn.addEventListener('click', () => {
       promoModal.classList.remove('active');
-      executeMove({ from: [...pendingPromo.from], to: [...pendingPromo.to], promotionPiece: p });
+      const promotionMove = {
+        from: [...pendingPromo.from],
+        to: [...pendingPromo.to],
+        promotionPiece: p,
+      };
       pendingPromo = null;
+      executeMove(promotionMove);
     });
     promoChoices.appendChild(btn);
   });
@@ -1593,9 +1764,12 @@ function showGameOver(type, winner) {
   if (type === 'checkmate') {
     gameOverTitle.textContent = 'Checkmate';
     gameOverMessage.textContent = winner + ' wins!';
-  } else {
+  } else if (type === 'stalemate') {
     gameOverTitle.textContent = 'Stalemate';
     gameOverMessage.textContent = 'The game is a draw.';
+  } else {
+    gameOverTitle.textContent = 'Resignation';
+    gameOverMessage.textContent = winner + ' wins by resignation.';
   }
   gameOverOverlay.classList.add('active');
 }
@@ -1605,7 +1779,12 @@ function showGameOver(type, winner) {
    ═══════════════════════════════════════════ */
 document.getElementById('btnUndo').addEventListener('click', () => {
   if (engine.getMoveHistory().length === 0) return;
-  engine.undo();
+  const wasComputerThinking = computerThinking;
+  cancelComputerMove();
+  const historyLength = engine.getMoveHistory().length;
+  const undoCount = gameMode === 'pvc' && !wasComputerThinking &&
+    engine.getTurn() === 'white' && historyLength >= 2 ? 2 : 1;
+  for (let index = 0; index < undoCount; index++) engine.undo();
   rebuildCapturedAfterUndo();
   const newHistory = engine.getMoveHistory();
   if (newHistory.length > 0) {
@@ -1617,24 +1796,31 @@ document.getElementById('btnUndo').addEventListener('click', () => {
   gameOver = false;
   gameOverOverlay.classList.remove('active');
   shieldedSquare = null;
+  shieldOwner = null;
   overclockKnight = null;
+  overclockSecondMove = false;
   activePerk = null;
   perkTargets = [];
   glitchFirst = null;
-  perkSystem.reset();
   clearSelection();
   render();
 });
 
 document.getElementById('btnNew').addEventListener('click', newGame);
 document.getElementById('btnResign').addEventListener('click', () => {
-  if (gameOver) return;
+  if (gameOver || computerThinking) return;
+  cancelComputerMove();
   gameOver = true;
-  showGameOver('checkmate', engine.getTurn() === 'white' ? 'Black' : 'White');
+  const winner = gameMode === 'pvc'
+    ? 'Computer'
+    : (engine.getTurn() === 'white' ? 'Black' : 'White');
+  showGameOver('resignation', winner);
+  render();
 });
 document.getElementById('btnPlayAgain').addEventListener('click', newGame);
 
 function newGame() {
+  cancelComputerMove();
   engine = new ChessEngine();
   selectedSquare = null;
   legalMoves = [];
@@ -1646,7 +1832,9 @@ function newGame() {
   activePerk = null;
   perkTargets = [];
   shieldedSquare = null;
+  shieldOwner = null;
   overclockKnight = null;
+  overclockSecondMove = false;
   glitchFirst = null;
   scanHighlight = null;
   if (scanTimeout) clearTimeout(scanTimeout);
@@ -1661,6 +1849,7 @@ function rebuildCapturedAfterUndo() {
   const tempEngine = new ChessEngine();
   capturedByWhite = [];
   capturedByBlack = [];
+  perkSystem.reset();
   for (const move of moveHistory) {
     const board = tempEngine.getBoard();
     const targetPiece = board[move.to[0]][move.to[1]];
@@ -1677,7 +1866,8 @@ function rebuildCapturedAfterUndo() {
         else capturedByBlack.push(capturedPawn);
       }
     }
-    tempEngine.makeMove(move);
+    perkSystem.onMoveMade(move, board, movingColor);
+    tempEngine.makeMove(move, { retainTurn: Boolean(move.retainTurn) });
   }
 }
 
