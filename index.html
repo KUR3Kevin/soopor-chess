@@ -664,6 +664,11 @@ body {
   color: var(--violet-light);
   box-shadow: 0 0 10px var(--violet-glow2);
 }
+.diff-btn[data-diff="intermediate"].active {
+  background: rgba(var(--violet-rgb),0.14);
+  color: var(--violet-light);
+  box-shadow: 0 0 10px var(--violet-glow2);
+}
 .diff-btn[data-diff="expert"].active {
   background: rgba(var(--gold-rgb),0.16);
   color: var(--gold);
@@ -1142,18 +1147,18 @@ body {
 /* Pieces — solid, glossy, high-contrast on cream */
 .piece { text-shadow: 0 1px 1px rgba(40,30,20,0.22); }
 .piece.white-piece {
-  color: #FCFAF4;
-  -webkit-text-stroke: 1.1px #5B4F41;
-  filter: drop-shadow(0 2px 2px rgba(40,30,20,0.30)) drop-shadow(0 0 1px rgba(0,0,0,0.25));
+  color: #FFFFFF;
+  -webkit-text-stroke: 1.2px #3A3028;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45)) drop-shadow(0 0 2px rgba(0,0,0,0.3));
 }
 .piece.black-piece {
-  color: #2B2620;
-  -webkit-text-stroke: 0.9px #F7EEE1;
-  filter: drop-shadow(0 2px 2px rgba(40,30,20,0.28));
+  color: #000000;
+  -webkit-text-stroke: 1.0px #E8DDD0;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
 }
 .cap-piece { opacity: 0.78; }
-.cap-piece.white-piece { -webkit-text-stroke-width: 0.6px; }
-.cap-piece.black-piece { -webkit-text-stroke-width: 0.3px; }
+.cap-piece.white-piece { -webkit-text-stroke-width: 0.7px; }
+.cap-piece.black-piece { -webkit-text-stroke-width: 0.4px; }
 
 /* Buttons + controls — warm */
 .btn { background: var(--bg2); border-color: var(--border); color: var(--text); box-shadow: 0 1px 2px rgba(60,45,30,0.07); }
@@ -1161,8 +1166,8 @@ body {
 .diff-seg, .super-switch, .perk-card { background: var(--bg2); }
 .promo-choice { background: var(--bg2); border-color: var(--border); }
 .promo-choice.white-piece, .promo-choice.black-piece { -webkit-text-stroke: 0; }
-.promo-choice.white-piece { color: #FCFAF4; text-shadow: 0 0 1px #5B4F41, 0 1px 2px rgba(0,0,0,0.3); }
-.promo-choice.black-piece { color: #2B2620; }
+.promo-choice.white-piece { color: #FFFFFF; text-shadow: 0 0 2px #3A3028, 0 1px 3px rgba(0,0,0,0.5); }
+.promo-choice.black-piece { color: #000000; }
 .perk-charge-bar { background: rgba(61,51,40,0.12); }
 .move-row:hover { background: rgba(var(--violet-rgb),0.08); }
 
@@ -1200,6 +1205,7 @@ body {
     <span class="diff-prefix">CPU LEVEL</span>
     <div class="diff-seg">
       <button class="diff-btn active" data-diff="beginner">Beginner</button>
+      <button class="diff-btn" data-diff="intermediate">Intermediate</button>
       <button class="diff-btn" data-diff="pro">Pro</button>
       <button class="diff-btn" data-diff="expert">Expert</button>
     </div>
@@ -1553,6 +1559,8 @@ function syncDifficultyUI() {
         : 'Expert will learn your style as you play';
     } else if (difficulty === 'pro') {
       difficultyHint.textContent = 'Solid and tactical — punishes mistakes';
+    } else if (difficulty === 'intermediate') {
+      difficultyHint.textContent = 'Looks ahead two moves — plays smart but not perfect';
     } else {
       difficultyHint.textContent = 'Casual play — beatable with basic strategy';
     }
@@ -1660,9 +1668,10 @@ const ChessAI = (() => {
   };
 
   const CONFIG = {
-    beginner: { maxDepth: 1, timeMs: 60,  usePST: false },
-    pro:      { maxDepth: 3, timeMs: 350, usePST: true },
-    expert:   { maxDepth: 4, timeMs: 1000, usePST: true, extend: true, memory: true },
+    beginner:     { maxDepth: 1, timeMs: 60,   usePST: false },
+    intermediate: { maxDepth: 2, timeMs: 180,  usePST: true },
+    pro:          { maxDepth: 3, timeMs: 350,  usePST: true },
+    expert:       { maxDepth: 4, timeMs: 1000, usePST: true, extend: true, memory: true },
   };
 
   let deadline = 0;
@@ -1796,6 +1805,7 @@ const ChessAI = (() => {
     if (level === 'beginner') return pickBeginner(eng, color);
     return searchRoot(eng, color, cfg);
   }
+  // Note: 'intermediate' uses searchRoot with maxDepth:2 — no special handler needed.
 
   return { pickMove };
 })();
