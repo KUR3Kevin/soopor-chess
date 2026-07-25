@@ -1,4 +1,56 @@
 <!DOCTYPE html>
+<!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║                  SOOPOR CHESS  –  v1.0.6                       ║
+  ║          AI MAINTENANCE GUIDE — READ BEFORE EDITING            ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║                                                                  ║
+  ║  PIECE COLORS (DO NOT CHANGE)                                   ║
+  ║  • "White" side → ORANGE  #FF6600  (moves first)               ║
+  ║  • "Black" side → BLUE    #0077FF  (moves second)              ║
+  ║  • All pieces have a 1px solid black outline (-webkit-text-     ║
+  ║    stroke: 1px #000000). Do not remove it.                      ║
+  ║  • font-variant-emoji: text is set on .piece — CRITICAL.        ║
+  ║    Without it the pawn glyph (♟) renders as a black emoji       ║
+  ║    and ignores CSS color.                                        ║
+  ║  • All PIECE_CHARS use the ︎ variation selector (︎) to     ║
+  ║    force text rendering. Do not remove those selectors.         ║
+  ║                                                                  ║
+  ║  COLOR PALETTE (ONLY these colors allowed)                      ║
+  ║  Red, White, Green, Dark Red, Dark Green, Black, Grey           ║
+  ║  • Background:    #111111 (near-black)                          ║
+  ║  • Light squares: #F2F2F2 (white/light grey)                   ║
+  ║  • Dark squares:  #8B0000 (dark red)                            ║
+  ║  • Primary accent: #CC2222 (red)                               ║
+  ║  • Secondary:     #155215 (dark green)                          ║
+  ║  • Do NOT introduce orange, yellow, purple, pink, or warm-      ║
+  ║    cream tones anywhere in backgrounds or UI.                   ║
+  ║                                                                  ║
+  ║  DISPLAY LABELS (DO NOT CHANGE)                                 ║
+  ║  • Turn text: "Orange's Turn" / "Blue's Turn"                  ║
+  ║  • Win/resign: "Orange wins" / "Blue wins"                     ║
+  ║  • The JS engine still uses 'white'/'black' internally —        ║
+  ║    only the display strings shown to the user are Orange/Blue.  ║
+  ║                                                                  ║
+  ║  DIFFICULTY LEVELS (DO NOT REMOVE OR REORDER)                  ║
+  ║  Beginner → Intermediate → Pro → Expert                        ║
+  ║  CONFIG depths: 1 / 2 / 3 / 4  (negamax + alpha-beta)         ║
+  ║                                                                  ║
+  ║  HEADER                                                          ║
+  ║  • Title: "Soopor Chess"                                        ║
+  ║  • Version shown: .version-tag element  (currently v1.0.6)     ║
+  ║    Update .version-tag text when bumping the version.           ║
+  ║                                                                  ║
+  ║  DEPLOYMENT                                                      ║
+  ║  • Netlify site: soopor-chess.netlify.app                       ║
+  ║  • Site ID: bfcb247c-fed3-48a7-be00-e79563a9505c               ║
+  ║  • Deploy cmd (run in project dir, requires Node 18+):          ║
+  ║    netlify deploy --prod --dir . --site <siteId>               ║
+  ║  • GitHub repo: KUR3Kevin/soopor-chess (main branch)           ║
+  ║    Push to main + run deploy cmd after every change.            ║
+  ║                                                                  ║
+  ╚══════════════════════════════════════════════════════════════════╝
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -7,40 +59,46 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/*
+ * APPROVED COLOR PALETTE — only red, white, green, dark red, dark green, black, grey.
+ * Do NOT introduce warm creams, oranges, yellows, purples, or blues into the UI/background.
+ * Piece colors (orange #FF6600 and blue #0077FF) are the ONLY exception to this rule,
+ * and those only appear on the chess pieces themselves, never on backgrounds or panels.
+ */
 :root {
-  /* ── Red / White / Mellow-Orange palette ── */
-  --bg: #FFF8F0;
-  --bg2: #FFFFFF;
-  --bg3: #FBE4CF;
-  --surface: rgba(255,255,255,0.6);
-  --border: rgba(120,55,38,0.16);
-  --border-bright: rgba(226,115,61,0.45);
-  --violet: #E2733D;          /* primary accent — mellow orange */
-  --violet-rgb: 226,115,61;
-  --violet-light: #EE9563;    /* lighter mellow orange */
-  --violet-glow: rgba(226,115,61,0.28);
-  --violet-glow2: rgba(226,115,61,0.10);
-  --cyan: #A63A2E;            /* secondary — deep red */
-  --cyan-rgb: 166,58,46;
-  --cyan-glow: rgba(166,58,46,0.30);
-  --pink: #C94E42;            /* tertiary — warm coral red */
-  --pink-rgb: 201,78,66;
-  --pink-glow: rgba(201,78,66,0.30);
-  --gold: #D98A42;            /* mellow amber-orange */
-  --gold-rgb: 217,138,66;
-  --gold-glow: rgba(217,138,66,0.32);
-  --red: #C0392B;
-  --red-glow: rgba(192,57,43,0.30);
-  --text: #3D362E;
-  --text-dim: #8C8273;
-  --text-bright: #211D18;
-  --light-square: #FDF3E6;
-  --dark-square: #E2A468;
-  --select: rgba(226,115,61,0.40);
-  --last-move: rgba(166,58,46,0.28);
-  --hint-empty: rgba(226,115,61,0.45);
-  --hint-capture: rgba(201,78,66,0.55);
-  --check-color: rgba(192,57,43,0.55);
+  /* ── Red / White / Green / Black / Grey palette ── */
+  --bg: #111111;              /* page background — near-black */
+  --bg2: #1E1E1E;             /* panel / card background */
+  --bg3: #2A2A2A;             /* elevated surface */
+  --surface: rgba(30,30,30,0.85);
+  --border: rgba(136,136,136,0.22);
+  --border-bright: rgba(204,34,34,0.55);
+  --violet: #CC2222;          /* primary accent — red (keep as red, not purple) */
+  --violet-rgb: 204,34,34;
+  --violet-light: #FF4444;    /* lighter red */
+  --violet-glow: rgba(204,34,34,0.32);
+  --violet-glow2: rgba(204,34,34,0.14);
+  --cyan: #155215;            /* secondary — dark green */
+  --cyan-rgb: 21,82,21;
+  --cyan-glow: rgba(21,82,21,0.35);
+  --pink: #8B0000;            /* dark red */
+  --pink-rgb: 139,0,0;
+  --pink-glow: rgba(139,0,0,0.35);
+  --gold: #228B22;            /* green (not gold — name kept for legacy var references) */
+  --gold-rgb: 34,139,34;
+  --gold-glow: rgba(34,139,34,0.35);
+  --red: #CC0000;
+  --red-glow: rgba(204,0,0,0.35);
+  --text: #E8E8E8;            /* primary text — light on dark bg */
+  --text-dim: #999999;        /* secondary text — grey */
+  --text-bright: #FFFFFF;
+  --light-square: #F2F2F2;   /* board light squares — white/light grey */
+  --dark-square: #8B0000;    /* board dark squares — dark red */
+  --select: rgba(34,139,34,0.55);   /* selected square — green tint */
+  --last-move: rgba(204,34,34,0.35);
+  --hint-empty: rgba(34,139,34,0.65);
+  --hint-capture: rgba(204,0,0,0.65);
+  --check-color: rgba(204,0,0,0.65);
   --radius: 10px;
   --radius-lg: 16px;
   --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
@@ -61,8 +119,8 @@ body {
   align-items: center;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(var(--violet-rgb),0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(var(--cyan-rgb),0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(204,34,34,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(21,82,21,0.10) 0%, transparent 50%),
     var(--bg);
 }
 
@@ -89,10 +147,10 @@ body {
   font-weight: 700;
   letter-spacing: 6px;
   font-variant: small-caps;
-  background: linear-gradient(135deg, var(--violet-light) 0%, var(--cyan) 100%);
+  background: linear-gradient(135deg, #FF4444 0%, #CC0000 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 20px var(--violet-glow2));
+  filter: drop-shadow(0 0 20px rgba(204,34,34,0.25));
 }
 .header h1 .super-badge {
   font-size: 0.55rem;
@@ -122,7 +180,7 @@ body {
   font-size: 1.35rem;
   letter-spacing: 5px;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--violet-light), var(--cyan));
+  background: linear-gradient(135deg, #FF4444, #CC0000);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -134,6 +192,14 @@ body {
   color: var(--text-dim);
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
+.version-tag {
+  margin-top: 2px;
+  font-size: 0.60rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #888888;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
 .brand { display: flex; flex-direction: column; align-items: flex-start; }
 .brand-mark {
   display: inline-flex;
@@ -142,16 +208,16 @@ body {
   margin: 5px 0 2px;
   padding: 3px 10px 3px 8px;
   border-radius: 20px;
-  background: linear-gradient(135deg, var(--violet), var(--red));
-  box-shadow: 0 2px 10px var(--violet-glow2);
+  background: linear-gradient(135deg, #CC2222, #8B0000);
+  box-shadow: 0 2px 10px rgba(204,34,34,0.22);
 }
-.brand-king { font-size: 1.05rem; line-height: 1; color: #FFF8F0; text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+.brand-king { font-size: 1.05rem; line-height: 1; color: #FFFFFF; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
 .brand-letters {
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 1.5px;
-  color: #FFF8F0;
+  color: #FFFFFF;
 }
 .top-actions {
   display: flex;
@@ -299,9 +365,9 @@ body {
   width: min(78vw, 500px);
   aspect-ratio: 1;
   box-shadow:
-    0 0 40px rgba(var(--violet-rgb),0.08),
-    0 0 80px rgba(0,0,0,0.4),
-    inset 0 0 60px rgba(0,0,0,0.3);
+    0 0 40px rgba(204,34,34,0.15),
+    0 0 80px rgba(0,0,0,0.6),
+    inset 0 0 60px rgba(0,0,0,0.4);
   position: relative;
 }
 .board::before {
@@ -409,10 +475,11 @@ body {
   position: relative;
   z-index: 2;
   transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), filter var(--transition);
-  text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  text-shadow: none;
+  font-variant-emoji: text;
 }
-.piece.white-piece { filter: drop-shadow(0 0 4px rgba(255,255,255,0.2)) drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
-.piece.black-piece { filter: drop-shadow(0 0 4px rgba(0,0,0,0.4)) drop-shadow(0 2px 4px rgba(0,0,0,0.6)); }
+.piece.white-piece { filter: none; }
+.piece.black-piece { filter: none; }
 .square:hover .piece { transform: scale(1.12) translateY(-2px); }
 
 /* Shielded piece */
@@ -1096,84 +1163,96 @@ body {
   background: var(--bg2);
   border-color: var(--border);
   color: var(--text-bright);
-  box-shadow: 0 1px 2px rgba(60,45,30,0.07);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 .icon-btn:hover { border-color: var(--violet); box-shadow: 0 2px 12px var(--violet-glow2); }
 .icon-btn.active { color: var(--violet); border-color: var(--violet); box-shadow: 0 2px 12px var(--violet-glow2); }
 
-/* Frosted glass surfaces */
+/* Dark surfaces */
 .panel, .perk-panel, .help-drawer, .perk-tooltip, .coach-inner {
-  background: rgba(255,255,255,0.55);
+  background: rgba(26,26,26,0.92);
   border-color: var(--border);
   backdrop-filter: blur(16px) saturate(1.1);
   -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  box-shadow: 0 10px 34px rgba(60,45,30,0.12), inset 0 1px 0 rgba(255,255,255,0.65);
+  box-shadow: 0 10px 34px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 .perk-panel::before { background: linear-gradient(90deg, transparent, var(--violet-glow), transparent); }
-.coach-inner { background: rgba(251,249,244,0.9); }
-.modal-overlay { background: rgba(40,32,24,0.42); backdrop-filter: blur(8px); }
-.help-overlay { background: rgba(40,32,24,0.5); }
+.coach-inner { background: rgba(20,20,20,0.95); }
+.modal-overlay { background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); }
+.help-overlay { background: rgba(0,0,0,0.72); }
 .modal-box {
-  background: rgba(251,249,244,0.94);
+  background: rgba(24,24,24,0.97);
   border-color: var(--border-bright);
-  box-shadow: 0 24px 70px rgba(60,42,28,0.28), inset 0 1px 0 rgba(255,255,255,0.7);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
-/* Glossy-glass board */
+/* Board */
 .board {
-  border: 1px solid var(--border-bright);
-  background: #E7B27E;
+  border: 1px solid rgba(204,34,34,0.55);
+  background: #8B0000;
   box-shadow:
-    0 20px 54px rgba(60,42,28,0.26),
-    0 0 0 9px rgba(255,255,255,0.4),
-    0 0 0 10px rgba(var(--violet-rgb),0.16),
-    inset 0 2px 0 rgba(255,255,255,0.5);
+    0 20px 54px rgba(0,0,0,0.5),
+    0 0 0 9px rgba(34,34,34,0.8),
+    0 0 0 10px rgba(204,34,34,0.25),
+    inset 0 2px 0 rgba(255,255,255,0.08);
 }
 .board::before { background: none; }
 .square.light {
-  background:
-    linear-gradient(158deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 46%),
-    var(--light-square);
+  background: var(--light-square);
 }
 .square.dark {
-  background:
-    linear-gradient(158deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0) 46%),
-    var(--dark-square);
+  background: var(--dark-square);
 }
-.square::after { background: linear-gradient(155deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 40%); }
-.square:hover { filter: brightness(1.05); }
-.square.selected { box-shadow: inset 0 0 0 3px var(--violet), inset 0 0 18px rgba(var(--violet-rgb),0.28); }
+.square::after { background: none; }
+.square:hover { filter: brightness(1.12); }
+.square.selected { box-shadow: inset 0 0 0 3px #228B22, inset 0 0 18px rgba(34,139,34,0.4); }
 
-/* Pieces — solid, glossy, high-contrast on cream */
-.piece { text-shadow: 0 1px 1px rgba(40,30,20,0.22); }
+/*
+ * PIECE COLORS — DO NOT CHANGE THESE RULES
+ * ─────────────────────────────────────────
+ * "White" side (moves first) = ORANGE  #FF6600
+ * "Black" side (moves second) = BLUE   #0077FF
+ *
+ * -webkit-text-stroke adds the thin black outline so pieces are
+ * visible against both the light (#F2F2F2) and dark red (#8B0000)
+ * board squares. Do not remove it.
+ *
+ * font-variant-emoji: text is set on .piece (below) and is CRITICAL —
+ * without it the pawn glyph ♟ (U+265F, added to emoji standard in
+ * Unicode 11) renders as a black emoji graphic and ignores CSS color.
+ *
+ * All PIECE_CHARS strings also append ︎ (U+FE0E, VS-15 variation
+ * selector) to force text presentation. Do not remove those characters.
+ */
+.piece { text-shadow: none; }
 .piece.white-piece {
-  color: #FFFFFF;
-  -webkit-text-stroke: 1.2px #3A3028;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45)) drop-shadow(0 0 2px rgba(0,0,0,0.3));
+  color: #FF6600;            /* orange — "white" side */
+  -webkit-text-stroke: 1px #000000;  /* thin black outline for contrast */
+  filter: none;
 }
 .piece.black-piece {
-  color: #000000;
-  -webkit-text-stroke: 1.0px #E8DDD0;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+  color: #0077FF;            /* blue — "black" side */
+  -webkit-text-stroke: 1px #000000;  /* thin black outline for contrast */
+  filter: none;
 }
 .cap-piece { opacity: 0.78; }
-.cap-piece.white-piece { -webkit-text-stroke-width: 0.7px; }
-.cap-piece.black-piece { -webkit-text-stroke-width: 0.4px; }
+.cap-piece.white-piece { -webkit-text-stroke: 0; }
+.cap-piece.black-piece { -webkit-text-stroke: 0; }
 
-/* Buttons + controls — warm */
-.btn { background: var(--bg2); border-color: var(--border); color: var(--text); box-shadow: 0 1px 2px rgba(60,45,30,0.07); }
+/* Buttons + controls */
+.btn { background: var(--bg2); border-color: var(--border); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
 .btn:hover { border-color: var(--violet); box-shadow: 0 2px 12px var(--violet-glow2); }
 .diff-seg, .super-switch, .perk-card { background: var(--bg2); }
 .promo-choice { background: var(--bg2); border-color: var(--border); }
-.promo-choice.white-piece, .promo-choice.black-piece { -webkit-text-stroke: 0; }
-.promo-choice.white-piece { color: #FFFFFF; text-shadow: 0 0 2px #3A3028, 0 1px 3px rgba(0,0,0,0.5); }
-.promo-choice.black-piece { color: #000000; }
-.perk-charge-bar { background: rgba(61,51,40,0.12); }
-.move-row:hover { background: rgba(var(--violet-rgb),0.08); }
+.promo-choice.white-piece, .promo-choice.black-piece { -webkit-text-stroke: 1px #000000; filter: none; text-shadow: none; }
+.promo-choice.white-piece { color: #FF6600; }
+.promo-choice.black-piece { color: #0077FF; }
+.perk-charge-bar { background: rgba(136,136,136,0.18); }
+.move-row:hover { background: rgba(204,34,34,0.10); }
 
-/* Turn dot legibility on cream */
-.white-turn .turn-dot { background: #FBF9F4; box-shadow: 0 0 0 1px rgba(60,45,30,0.35); }
-.black-turn .turn-dot { background: #2B2620; box-shadow: 0 0 0 1px rgba(60,45,30,0.2); }
+/* Turn dot — orange for orange side, blue for blue side */
+.white-turn .turn-dot { background: #FF6600; box-shadow: 0 0 6px rgba(255,102,0,0.5); }
+.black-turn .turn-dot { background: #0077FF; box-shadow: 0 0 6px rgba(0,119,255,0.5); }
 
 </style>
 </head>
@@ -1181,10 +1260,10 @@ body {
 <div class="title-banner">
     <div class="brand">
       <div class="game-title">Soopor Chess</div>
+      <div class="version-tag">v1.0.6</div>
       <div class="brand-mark" aria-hidden="true">
         <span class="brand-king">♔</span><span class="brand-letters">SC</span>
       </div>
-      <div class="subtitle">super chess with optional powers</div>
     </div>
     <div class="top-actions">
       <button class="icon-btn" id="btnTutorial" title="Learn to play">🎓</button>
@@ -1194,7 +1273,7 @@ body {
   </div>
   <div class="turn-badge" id="turnIndicator">
     <span class="turn-dot"></span>
-    <span id="turnText">White's Turn</span>
+    <span id="turnText">Orange's Turn</span>
   </div>
   <div class="super-toggle">
     <span class="super-label" id="superLabel">CLASSIC</span>
@@ -1312,7 +1391,7 @@ body {
 <div class="modal-overlay" id="gameOverOverlay">
   <div class="modal-box gameover-box" id="gameOverBox">
     <h2 id="gameOverTitle">Checkmate</h2>
-    <p id="gameOverMessage">White wins!</p>
+    <p id="gameOverMessage">Orange wins!</p>
     <button class="btn" id="btnPlayAgain">Play Again</button>
   </div>
 </div>
@@ -1460,12 +1539,25 @@ class PerkSystem {
 /* ═══════════════════════════════════════════
    GAME STATE
    ═══════════════════════════════════════════ */
-// Use the filled glyph set for BOTH sides; colour distinguishes them.
-// This keeps white pieces solid + outlined (readable on the cream board)
-// instead of hollow outline glyphs that vanish on a light theme.
+/*
+ * PIECE_CHARS — CRITICAL: DO NOT MODIFY THE ︎ CHARACTERS
+ * ─────────────────────────────────────────────────────────
+ * Both sides use the same filled Unicode chess glyphs (♚♛♜♝♞♟).
+ * CSS `color` on .white-piece / .black-piece distinguishes orange vs blue.
+ *
+ * Every glyph is followed by U+FE0E (VARIATION SELECTOR-15, shown as ︎).
+ * This forces TEXT presentation instead of EMOJI presentation.
+ * The pawn ♟ (U+265F) is part of the emoji standard — without VS-15 it
+ * renders as a colored emoji graphic and ignores CSS color, appearing
+ * black on all squares regardless of which side it belongs to.
+ * The other pieces (♚♛♜♝♞) are also given VS-15 for consistency.
+ *
+ * If you ever replace these characters, ensure the replacement also
+ * includes U+FE0E or uses a non-emoji glyph set.
+ */
 const PIECE_CHARS = {
-  'K':'♚','Q':'♛','R':'♜','B':'♝','N':'♞','P':'♟',
-  'k':'♚','q':'♛','r':'♜','b':'♝','n':'♞','p':'♟'
+  'K':'♚︎','Q':'♛︎','R':'♜︎','B':'♝︎','N':'♞︎','P':'♟︎',
+  'k':'♚︎','q':'♛︎','r':'♜︎','b':'♝︎','n':'♞︎','p':'♟︎'
 };
 const PIECE_VALUES = { p:1, n:3, b:3, r:5, q:9, k:0 };
 
@@ -2210,7 +2302,7 @@ function render() {
   const board = engine.getBoard();
   const turn = engine.getTurn();
 
-  turnTextEl.textContent = turn === 'white' ? "White's Turn" : "Black's Turn";
+  turnTextEl.textContent = turn === 'white' ? "Orange's Turn" : "Blue's Turn";
   turnIndicatorEl.className = `turn-badge ${turn === 'white' ? 'white-turn' : 'black-turn'}`;
 
   let checkKingSq = null;
@@ -2574,7 +2666,7 @@ function executeMove(move, options = {}) {
     gameOver = true;
     // `turn` is the side that has been mated — the loser.
     finalizeExpertGame(turn === computerColor);
-    showGameOver('checkmate', turn === 'white' ? 'Black' : 'White');
+    showGameOver('checkmate', turn === 'white' ? 'Blue' : 'Orange');
   } else if (engine.isStalemate(turn)) {
     gameOver = true;
     finalizeExpertGame(false);
@@ -2665,7 +2757,7 @@ document.getElementById('btnResign').addEventListener('click', () => {
   gameOver = true;
   // The side to move resigns; if that's the human vs Expert, the CPU "wins".
   finalizeExpertGame(false);
-  showGameOver('resign', engine.getTurn() === 'white' ? 'Black' : 'White');
+  showGameOver('resign', engine.getTurn() === 'white' ? 'Blue' : 'Orange');
 });
 document.getElementById('btnPlayAgain').addEventListener('click', newGame);
 
