@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <!--
   ╔══════════════════════════════════════════════════════════════════╗
-  ║                  SOOPOR CHESS  –  v1.0.6                       ║
+  ║                  SOOPOR CHESS  –  v1.1.9                       ║
   ║          AI MAINTENANCE GUIDE — READ BEFORE EDITING            ║
   ╠══════════════════════════════════════════════════════════════════╣
   ║                                                                  ║
   ║  PIECE COLORS (DO NOT CHANGE)                                   ║
-  ║  • "White" side → ORANGE  #FF6600  (moves first)               ║
-  ║  • "Black" side → BLUE    #0077FF  (moves second)              ║
+  ║  • "White" side → BLUE    #1E88E5  (moves first)               ║
+  ║  • "Black" side → NAVY    #0B3D91  (moves second)              ║
   ║  • All pieces have a 1px solid black outline (-webkit-text-     ║
   ║    stroke: 1px #000000). Do not remove it.                      ║
   ║  • font-variant-emoji: text is set on .piece — CRITICAL.        ║
@@ -16,21 +16,19 @@
   ║  • All PIECE_CHARS use the ︎ variation selector (︎) to     ║
   ║    force text rendering. Do not remove those selectors.         ║
   ║                                                                  ║
-  ║  COLOR PALETTE (ONLY these colors allowed)                      ║
-  ║  Red, White, Green, Dark Red, Dark Green, Black, Grey           ║
-  ║  • Background:    #111111 (near-black)                          ║
-  ║  • Light squares: #F2F2F2 (white/light grey)                   ║
-  ║  • Dark squares:  #8B0000 (dark red)                            ║
-  ║  • Primary accent: #CC2222 (red)                               ║
-  ║  • Secondary:     #155215 (dark green)                          ║
-  ║  • Do NOT introduce orange, yellow, purple, pink, or warm-      ║
-  ║    cream tones anywhere in backgrounds or UI.                   ║
+  ║  THEME — Parklight Edition (day/night park scene)               ║
+  ║  • Backgrounds: assets/park-day.jpg / assets/park-night.jpg     ║
+  ║  • Theme tokens on body[data-theme="day"|"night"]               ║
+  ║  • Session theme auto-picked from local time (6:00–17:59 day);  ║
+  ║    locked for the match; Auto/Day/Night via the 🌓 button.      ║
+  ║  • Accent: burnt orange #E97924; legal target gold #F0C45E      ║
   ║                                                                  ║
   ║  DISPLAY LABELS (DO NOT CHANGE)                                 ║
-  ║  • Turn text: "Orange's Turn" / "Blue's Turn"                  ║
-  ║  • Win/resign: "Orange wins" / "Blue wins"                     ║
+  ║  • Turn text: "Blue to Move" / "Navy to Move"                  ║
+  ║  • Win/resign: "Blue wins" / "Navy wins"                        ║
+  ║  • Modes: PvP (player vs player) / CvP (computer vs player)     ║
   ║  • The JS engine still uses 'white'/'black' internally —        ║
-  ║    only the display strings shown to the user are Orange/Blue.  ║
+  ║    only the display strings shown to the user are Blue/Navy.    ║
   ║                                                                  ║
   ║  DIFFICULTY LEVELS (DO NOT REMOVE OR REORDER)                  ║
   ║  Beginner → Intermediate → Pro → Expert                        ║
@@ -38,7 +36,7 @@
   ║                                                                  ║
   ║  HEADER                                                          ║
   ║  • Title: "Soopor Chess"                                        ║
-  ║  • Version shown: .version-tag element  (currently v1.0.6)     ║
+  ║  • Version shown: .version-tag element  (currently v1.1.9)     ║
   ║    Update .version-tag text when bumping the version.           ║
   ║                                                                  ║
   ║  DEPLOYMENT                                                      ║
@@ -55,50 +53,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⟨ Soopor Chess ⟩</title>
+<title>Soopor Chess</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /*
- * APPROVED COLOR PALETTE — only red, white, green, dark red, dark green, black, grey.
- * Do NOT introduce warm creams, oranges, yellows, purples, or blues into the UI/background.
- * Piece colors (orange #FF6600 and blue #0077FF) are the ONLY exception to this rule,
- * and those only appear on the chess pieces themselves, never on backgrounds or panels.
+ * THEME — clean wood & outdoors (v1.1.9).
+ * Warm cream page, wood-brown accents, leaf-green secondary, classic maple/walnut board.
+ * Piece colors: "white" side → BLUE #1E88E5, "black" side → NAVY #0B3D91.
  */
 :root {
-  /* ── Red / White / Green / Black / Grey palette ── */
-  --bg: #111111;              /* page background — near-black */
-  --bg2: #1E1E1E;             /* panel / card background */
-  --bg3: #2A2A2A;             /* elevated surface */
-  --surface: rgba(30,30,30,0.85);
-  --border: rgba(136,136,136,0.22);
-  --border-bright: rgba(204,34,34,0.55);
-  --violet: #CC2222;          /* primary accent — red (keep as red, not purple) */
-  --violet-rgb: 204,34,34;
-  --violet-light: #FF4444;    /* lighter red */
-  --violet-glow: rgba(204,34,34,0.32);
-  --violet-glow2: rgba(204,34,34,0.14);
-  --cyan: #155215;            /* secondary — dark green */
-  --cyan-rgb: 21,82,21;
-  --cyan-glow: rgba(21,82,21,0.35);
-  --pink: #8B0000;            /* dark red */
-  --pink-rgb: 139,0,0;
-  --pink-glow: rgba(139,0,0,0.35);
-  --gold: #228B22;            /* green (not gold — name kept for legacy var references) */
-  --gold-rgb: 34,139,34;
-  --gold-glow: rgba(34,139,34,0.35);
-  --red: #CC0000;
-  --red-glow: rgba(204,0,0,0.35);
-  --text: #E8E8E8;            /* primary text — light on dark bg */
-  --text-dim: #999999;        /* secondary text — grey */
-  --text-bright: #FFFFFF;
-  --light-square: #F2F2F2;   /* board light squares — white/light grey */
-  --dark-square: #8B0000;    /* board dark squares — dark red */
-  --select: rgba(34,139,34,0.55);   /* selected square — green tint */
-  --last-move: rgba(204,34,34,0.35);
-  --hint-empty: rgba(34,139,34,0.65);
-  --hint-capture: rgba(204,0,0,0.65);
-  --check-color: rgba(204,0,0,0.65);
+  /* ── Wood / outdoors palette ── */
+  --bg: #EFE7D6;              /* page background — warm cream */
+  --bg2: #FBF6EA;             /* panel / card background */
+  --bg3: #F3EBDA;             /* elevated surface */
+  --surface: rgba(251,246,234,0.9);
+  --border: rgba(120,85,40,0.26);
+  --border-bright: rgba(139,94,52,0.55);
+  --violet: #8B5E34;          /* primary accent — wood brown (legacy var name) */
+  --violet-rgb: 139,94,52;
+  --violet-light: #A9743F;    /* lighter wood */
+  --violet-glow: rgba(139,94,52,0.28);
+  --violet-glow2: rgba(139,94,52,0.12);
+  --cyan: #4C7A45;            /* secondary — leaf green */
+  --cyan-rgb: 76,122,69;
+  --cyan-glow: rgba(76,122,69,0.30);
+  --pink: #6B4226;            /* dark walnut */
+  --pink-rgb: 107,66,38;
+  --pink-glow: rgba(107,66,38,0.30);
+  --gold: #3E7C4F;            /* forest green (legacy var name) */
+  --gold-rgb: 62,124,79;
+  --gold-glow: rgba(62,124,79,0.30);
+  --red: #B23A2E;
+  --red-glow: rgba(178,58,46,0.35);
+  --text: #3B2C1C;            /* primary text — dark brown */
+  --text-dim: #8A7B66;        /* secondary text — muted tan */
+  --text-bright: #241A0E;
+  --light-square: #F0D9B5;   /* board light squares — maple */
+  --dark-square: #B58863;    /* board dark squares — walnut */
+  --select: rgba(62,124,79,0.45);   /* selected square — green tint */
+  --last-move: rgba(139,94,52,0.30);
+  --hint-empty: rgba(62,124,79,0.55);
+  --hint-capture: rgba(178,58,46,0.60);
+  --check-color: rgba(178,58,46,0.60);
   --radius: 10px;
   --radius-lg: 16px;
   --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
@@ -119,9 +119,9 @@ body {
   align-items: center;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(204,34,34,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(21,82,21,0.10) 0%, transparent 50%),
-    var(--bg);
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(178,214,140,0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139,94,52,0.12) 0%, transparent 50%),
+    linear-gradient(180deg, #F4EDDD 0%, var(--bg) 45%, #E7DCC4 100%);
 }
 
 /* ═══════════════════════════════════════════
@@ -147,10 +147,10 @@ body {
   font-weight: 700;
   letter-spacing: 6px;
   font-variant: small-caps;
-  background: linear-gradient(135deg, #FF4444 0%, #CC0000 100%);
+  background: linear-gradient(135deg, #A9743F 0%, #8B5E34 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 20px rgba(204,34,34,0.25));
+  filter: drop-shadow(0 0 20px rgba(139,94,52,0.25));
 }
 .header h1 .super-badge {
   font-size: 0.55rem;
@@ -180,7 +180,7 @@ body {
   font-size: 1.35rem;
   letter-spacing: 5px;
   font-weight: 800;
-  background: linear-gradient(135deg, #FF4444, #CC0000);
+  background: linear-gradient(135deg, #A9743F, #8B5E34);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -197,27 +197,24 @@ body {
   font-size: 0.60rem;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #888888;
+  color: #8A7B66;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 .brand { display: flex; flex-direction: column; align-items: flex-start; }
-.brand-mark {
+.brand-row { display: flex; align-items: center; gap: 12px; }
+.brand-king-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin: 5px 0 2px;
-  padding: 3px 10px 3px 8px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #CC2222, #8B0000);
-  box-shadow: 0 2px 10px rgba(204,34,34,0.22);
-}
-.brand-king { font-size: 1.05rem; line-height: 1; color: #FFFFFF; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-.brand-letters {
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  color: #FFFFFF;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #A9743F, #6B4226);
+  color: #F5E9D0;
+  font-size: 1.35rem;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  box-shadow: 0 3px 10px rgba(107,66,38,0.35), inset 0 1px 0 rgba(255,255,255,0.28);
 }
 .top-actions {
   display: flex;
@@ -256,7 +253,7 @@ body {
   overflow: auto;
   border-radius: 18px;
   border: 1px solid rgba(var(--violet-rgb),0.28);
-  background: linear-gradient(180deg, rgba(13,13,21,0.98), rgba(8,8,14,0.98));
+  background: linear-gradient(180deg, rgba(255,252,244,0.97), rgba(247,240,227,0.97));
   box-shadow: 0 30px 90px rgba(0,0,0,0.45);
   padding: 16px;
 }
@@ -365,7 +362,7 @@ body {
   width: min(78vw, 500px);
   aspect-ratio: 1;
   box-shadow:
-    0 0 40px rgba(204,34,34,0.15),
+    0 0 40px rgba(139,94,52,0.15),
     0 0 80px rgba(0,0,0,0.6),
     inset 0 0 60px rgba(0,0,0,0.4);
   position: relative;
@@ -413,7 +410,7 @@ body {
 .square.check { animation: checkPulse 1s ease-in-out infinite alternate; }
 @keyframes checkPulse {
   from { box-shadow: inset 0 0 16px var(--check-color); }
-  to   { box-shadow: inset 0 0 32px var(--check-color), inset 0 0 60px rgba(239,68,68,0.2); }
+  to   { box-shadow: inset 0 0 32px var(--check-color), inset 0 0 60px rgba(178,58,46,0.2); }
 }
 
 .square.hint-empty::before {
@@ -459,7 +456,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(239,68,68,0.25);
+  background: rgba(178,58,46,0.22);
   border: 2px solid var(--red);
   box-shadow: 0 0 16px var(--red-glow);
   pointer-events: none;
@@ -779,7 +776,7 @@ body.super-mode .perk-reveal.open {
 }
 
 .perk-panel {
-  background: linear-gradient(180deg, rgba(18,18,30,0.98), rgba(12,12,18,0.98));
+  background: linear-gradient(180deg, rgba(255,252,244,0.97), rgba(247,240,227,0.97));
   border: 1px solid rgba(var(--violet-rgb),0.24);
   border-radius: var(--radius-lg);
   padding: 14px 16px;
@@ -1084,7 +1081,7 @@ body.super-mode .perk-reveal.open {
   width: min(560px, calc(100vw - 24px)); z-index: 1200; opacity: 0; pointer-events: none;
   transition: transform .35s cubic-bezier(.2,.8,.2,1), opacity .25s; }
 .coach.open { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
-.coach-inner { background: linear-gradient(160deg, rgba(22,20,42,0.98), rgba(14,13,26,0.98));
+.coach-inner { background: linear-gradient(160deg, rgba(255,252,244,0.98), rgba(245,238,224,0.98));
   border: 1px solid var(--border-bright); border-radius: var(--radius-lg);
   box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(var(--violet-rgb),0.08);
   padding: 16px 18px; backdrop-filter: blur(8px); }
@@ -1170,30 +1167,30 @@ body {
 
 /* Dark surfaces */
 .panel, .perk-panel, .help-drawer, .perk-tooltip, .coach-inner {
-  background: rgba(26,26,26,0.92);
+  background: rgba(255,252,244,0.94);
   border-color: var(--border);
   backdrop-filter: blur(16px) saturate(1.1);
   -webkit-backdrop-filter: blur(16px) saturate(1.1);
   box-shadow: 0 10px 34px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 .perk-panel::before { background: linear-gradient(90deg, transparent, var(--violet-glow), transparent); }
-.coach-inner { background: rgba(20,20,20,0.95); }
+.coach-inner { background: rgba(255,252,244,0.96); }
 .modal-overlay { background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); }
 .help-overlay { background: rgba(0,0,0,0.72); }
 .modal-box {
-  background: rgba(24,24,24,0.97);
+  background: rgba(251,246,234,0.97);
   border-color: var(--border-bright);
   box-shadow: 0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 /* Board */
 .board {
-  border: 1px solid rgba(204,34,34,0.55);
-  background: #8B0000;
+  border: 1px solid rgba(139,94,52,0.55);
+  background: #6B4226;
   box-shadow:
     0 20px 54px rgba(0,0,0,0.5),
-    0 0 0 9px rgba(34,34,34,0.8),
-    0 0 0 10px rgba(204,34,34,0.25),
+    0 0 0 9px rgba(107,66,38,0.55),
+    0 0 0 10px rgba(139,94,52,0.25),
     inset 0 2px 0 rgba(255,255,255,0.08);
 }
 .board::before { background: none; }
@@ -1205,16 +1202,16 @@ body {
 }
 .square::after { background: none; }
 .square:hover { filter: brightness(1.12); }
-.square.selected { box-shadow: inset 0 0 0 3px #228B22, inset 0 0 18px rgba(34,139,34,0.4); }
+.square.selected { box-shadow: inset 0 0 0 3px #3E7C4F, inset 0 0 18px rgba(62,124,79,0.4); }
 
 /*
  * PIECE COLORS — DO NOT CHANGE THESE RULES
  * ─────────────────────────────────────────
- * "White" side (moves first) = ORANGE  #FF6600
- * "Black" side (moves second) = BLUE   #0077FF
+ * "White" side (moves first) = BLUE #1E88E5
+ * "Black" side (moves second) = BLUE   #0B3D91
  *
  * -webkit-text-stroke adds the thin black outline so pieces are
- * visible against both the light (#F2F2F2) and dark red (#8B0000)
+ * visible against both the light (#F2F2F2) and dark red (#6B4226)
  * board squares. Do not remove it.
  *
  * font-variant-emoji: text is set on .piece (below) and is CRITICAL —
@@ -1226,12 +1223,12 @@ body {
  */
 .piece { text-shadow: none; }
 .piece.white-piece {
-  color: #FF6600;            /* orange — "white" side */
+  color: #1E88E5;            /* blue — "white" side */
   -webkit-text-stroke: 1px #000000;  /* thin black outline for contrast */
   filter: none;
 }
 .piece.black-piece {
-  color: #0077FF;            /* blue — "black" side */
+  color: #0B3D91;            /* blue — "black" side */
   -webkit-text-stroke: 1px #000000;  /* thin black outline for contrast */
   filter: none;
 }
@@ -1245,50 +1242,528 @@ body {
 .diff-seg, .super-switch, .perk-card { background: var(--bg2); }
 .promo-choice { background: var(--bg2); border-color: var(--border); }
 .promo-choice.white-piece, .promo-choice.black-piece { -webkit-text-stroke: 1px #000000; filter: none; text-shadow: none; }
-.promo-choice.white-piece { color: #FF6600; }
-.promo-choice.black-piece { color: #0077FF; }
-.perk-charge-bar { background: rgba(136,136,136,0.18); }
-.move-row:hover { background: rgba(204,34,34,0.10); }
+.promo-choice.white-piece { color: #1E88E5; }
+.promo-choice.black-piece { color: #0B3D91; }
+.perk-charge-bar { background: rgba(139,94,52,0.16); }
+.move-row:hover { background: rgba(139,94,52,0.10); }
 
-/* Turn dot — orange for orange side, blue for blue side */
-.white-turn .turn-dot { background: #FF6600; box-shadow: 0 0 6px rgba(255,102,0,0.5); }
-.black-turn .turn-dot { background: #0077FF; box-shadow: 0 0 6px rgba(0,119,255,0.5); }
+/* Turn dot — blue for blue side, navy for navy side */
+.white-turn .turn-dot { background: #1E88E5; box-shadow: 0 0 6px rgba(30,136,229,0.5); }
+.black-turn .turn-dot { background: #0B3D91; box-shadow: 0 0 6px rgba(11,61,145,0.5); }
+
+/* ══════════════════════════════════════════════════════════════
+   PARKLIGHT EDITION — theme & component overrides (v1.1.9)
+   ══════════════════════════════════════════════════════════════ */
+body[data-theme="day"] {
+  --scene-scrim-top: rgba(15, 31, 18, 0.20);
+  --scene-scrim-bottom: rgba(22, 18, 12, 0.64);
+  --surface-glass: rgba(27, 30, 22, 0.68);
+  --surface-strong: rgba(26, 30, 21, 0.84);
+  --text-primary: #FFF6DD;
+  --text-secondary: #D9D1BB;
+  --board-light: #E7DDBC;
+  --board-dark: #42583C;
+  --board-frame: #5B3A24;
+  --legal-target: #F0C45E;
+  --primary-button: #315A2E;
+}
+body[data-theme="night"] {
+  --scene-scrim-top: rgba(3, 11, 20, 0.30);
+  --scene-scrim-bottom: rgba(3, 9, 16, 0.78);
+  --surface-glass: rgba(6, 17, 28, 0.74);
+  --surface-strong: rgba(5, 14, 24, 0.88);
+  --text-primary: #F1EBD9;
+  --text-secondary: #B8C4CE;
+  --board-light: #D9D9D1;
+  --board-dark: #183B37;
+  --board-frame: #2D2C2C;
+  --legal-target: #F2C767;
+  --primary-button: #244B31;
+}
+body[data-theme="day"], body[data-theme="night"] {
+  --orange-500: #E97924;
+  --orange-400: #F18A33;
+  --gold-400: #E8C66A;
+  --glass-border: rgba(255, 255, 255, 0.24);
+  --shadow-card: 0 12px 30px rgba(0, 0, 0, 0.24);
+  /* remap legacy vars onto the Parklight palette */
+  --bg: transparent;
+  --bg2: var(--surface-glass);
+  --bg3: var(--surface-glass);
+  --surface: var(--surface-glass);
+  --border: var(--glass-border);
+  --border-bright: rgba(232, 198, 106, 0.55);
+  --violet: #E97924;
+  --violet-rgb: 233, 121, 36;
+  --violet-light: #F18A33;
+  --violet-glow: rgba(233, 121, 36, 0.32);
+  --violet-glow2: rgba(233, 121, 36, 0.14);
+  --cyan: #5E8C4A;
+  --cyan-rgb: 94, 140, 74;
+  --cyan-glow: rgba(94, 140, 74, 0.35);
+  --pink: #B85A1E;
+  --pink-rgb: 184, 90, 30;
+  --pink-glow: rgba(184, 90, 30, 0.35);
+  --gold: #E8C66A;
+  --gold-rgb: 232, 198, 106;
+  --gold-glow: rgba(232, 198, 106, 0.35);
+  --red: #D94F3D;
+  --red-glow: rgba(217, 79, 61, 0.35);
+  --text: var(--text-primary);
+  --text-dim: var(--text-secondary);
+  --text-bright: #FFFDF5;
+  --light-square: var(--board-light);
+  --dark-square: var(--board-dark);
+  --select: rgba(232, 198, 106, 0.32);
+  --last-move: rgba(232, 198, 106, 0.18);
+  --hint-empty: rgba(240, 196, 94, 0.85);
+  --hint-capture: rgba(233, 121, 36, 0.9);
+  --check-color: rgba(217, 79, 61, 0.6);
+}
+
+/* ── Environment layers ── */
+html, body { background: #101810; }
+body { background: none !important; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+.env {
+  position: fixed; inset: 0; z-index: -3;
+  background-size: cover; background-position: center 30%;
+  transition: opacity 0.8s ease;
+}
+.env-day { background-image: url('assets/park-day.jpg'); }
+.env-night { background-image: url('assets/park-night.jpg'); opacity: 0; }
+body[data-theme="night"] .env-night { opacity: 1; }
+.scene-scrim {
+  position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background: linear-gradient(180deg,
+    var(--scene-scrim-top) 0%, transparent 28%,
+    transparent 52%, var(--scene-scrim-bottom) 100%);
+}
+
+/* ── Brand header ── */
+.title-banner { max-width: 560px; padding: 20px 16px 4px; }
+.game-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(28px, 8.7vw, 42px);
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  background: none;
+  -webkit-text-fill-color: #FFF6DD;
+  color: #FFF6DD;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+}
+.version-tag {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-family: 'Inter', system-ui, sans-serif;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+}
+.brand-king-badge {
+  width: 52px; height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #8A5A33, #49301F);
+  border: 1px solid rgba(232, 198, 106, 0.5);
+  color: #F4EBD5;
+  font-size: 1.7rem;
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.brand-row { gap: 14px; }
+
+/* ── Circular icon buttons (48px glass) ── */
+.icon-btn {
+  width: 48px; height: 48px;
+  font-size: 20px;
+  background: var(--surface-glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+}
+.icon-btn:hover { border-color: var(--orange-400); box-shadow: 0 0 14px var(--violet-glow2); }
+.icon-btn:active { transform: scale(0.96); transition-duration: 80ms; }
+.icon-btn:focus-visible { outline: 3px solid var(--gold-400); outline-offset: 2px; }
+
+/* ── Turn status pill ── */
+.turn-badge {
+  height: 48px;
+  padding: 0 20px;
+  margin-top: 12px;
+  gap: 10px;
+  border-radius: 999px;
+  background: var(--surface-glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-card);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.turn-badge.white-turn, .turn-badge.black-turn { border-color: var(--glass-border); color: var(--text-primary); }
+.turn-dot { width: 10px; height: 10px; }
+.black-turn .turn-dot { border: 1.5px solid rgba(255,255,255,0.55); }
+
+/* ── Combined mode / opponent segmented control ── */
+.match-wrap { position: relative; width: min(100vw - 32px, 560px); margin-top: 12px; z-index: 40; }
+.match-controls {
+  display: flex;
+  height: 48px;
+  border-radius: 24px;
+  background: var(--surface-glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-card);
+  padding: 4px;
+  gap: 4px;
+}
+.seg-btn {
+  flex: 1;
+  border: 1.5px solid transparent;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  padding: 0 6px;
+}
+.seg-btn:hover { color: var(--text-primary); }
+.seg-btn.seg-active {
+  border-color: var(--orange-400);
+  background: rgba(233, 121, 36, 0.16);
+  color: var(--orange-400);
+}
+.opponent-sheet {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0; right: 0;
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.opponent-sheet[hidden] { display: none; }
+.opponent-sheet button {
+  min-height: 44px;
+  border: none;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-align: left;
+  padding: 0 16px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.opponent-sheet button:hover { background: rgba(233, 121, 36, 0.18); }
+
+/* ── Board with wood frame ── */
+.main { max-width: 1120px; padding: 12px 16px 24px; gap: 20px; }
+.board-wrapper {
+  padding: 12px 12px 34px 34px;
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.10), transparent 40%),
+    var(--board-frame);
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-card), inset 0 2px 4px rgba(255,255,255,0.12), inset 0 -3px 8px rgba(0,0,0,0.35);
+}
+.board {
+  width: min(calc(100vw - 104px), 500px);
+  border: 1px solid rgba(232, 198, 106, 0.45);
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+}
+.board::before { display: none; }
+.rank-labels, .file-labels {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #F2E2B6;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.75);
+}
+.square:hover { filter: brightness(1.08); }
+
+/* ── Selection pop (signature interaction) ── */
+.piece {
+  transform-origin: 50% 82%;
+  transition:
+    transform 220ms cubic-bezier(.2, .9, .25, 1.2),
+    filter 180ms ease;
+}
+.square.selected {
+  background: var(--select) !important;
+  filter: brightness(1.06);
+  box-shadow: inset 0 0 0 2px var(--gold-400);
+}
+.square.selected .piece {
+  transform: translateY(-8px) scale(1.12);
+  filter: drop-shadow(0 14px 9px rgba(0, 0, 0, 0.34));
+  z-index: 6;
+}
+.square.selected::after {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  border: 2px solid var(--gold-400);
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 5;
+}
+/* legal empty target — center dot; capture — perimeter ring (distinct visuals) */
+.square.hint-empty::before {
+  width: 18%; height: 18%;
+  background: var(--legal-target);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+  animation: markerFade 130ms ease;
+}
+.square.hint-capture::before {
+  inset: 19%;
+  border: 3px solid var(--hint-capture);
+  border-radius: 50%;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.3);
+  animation: markerFade 130ms ease;
+}
+@keyframes markerFade { from { opacity: 0; } to { opacity: 1; } }
+/* Pawn Sprint armed — eligible pawns pulse gold */
+.square.sprint-eligible {
+  box-shadow: inset 0 0 0 2px var(--gold-400), inset 0 0 18px rgba(232,198,106,0.35);
+  animation: perkPulse 1.5s ease-in-out infinite;
+}
+
+/* ── Player cards ── */
+.player-cards {
+  display: flex;
+  gap: 12px;
+  width: min(100%, 560px);
+}
+.player-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 76px;
+  padding: 0 16px;
+  border-radius: 18px;
+  background: var(--surface-glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1.5px solid var(--glass-border);
+  box-shadow: var(--shadow-card);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.player-card.active-turn {
+  border-color: var(--orange-400);
+  box-shadow: var(--shadow-card), 0 0 16px rgba(233,121,36,0.25);
+}
+.pc-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 1.5px solid var(--glass-border);
+  background: rgba(255,255,255,0.08);
+  font-size: 26px;
+  line-height: 1;
+  -webkit-text-stroke: 0;
+}
+.pc-avatar.white-piece { color: #6FB3F2; border-color: rgba(111,179,242,0.6); }
+.pc-avatar.black-piece { color: #9FB6DA; border-color: rgba(159,182,218,0.5); }
+.pc-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.pc-sub {
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--orange-400);
+}
+
+/* ── Captured trays ── */
+.trays {
+  display: flex;
+  gap: 12px;
+  width: min(100%, 560px);
+}
+.tray { flex: 1; min-height: 72px; }
+.tray .captured-row { min-height: 34px; }
+.cap-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-left: 2px;
+  font-style: normal;
+}
+
+/* ── Panels / cards → frosted glass ── */
+.panel, .perk-panel, .modal-box, .help-drawer, .coach-inner, .diff-seg {
+  background: var(--surface-glass) !important;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--shadow-card);
+  color: var(--text-primary);
+}
+.panel-title { color: var(--text-primary); border-color: rgba(255,255,255,0.14); }
+.move-row { color: var(--text-secondary); }
+.move-row:hover { background: rgba(233,121,36,0.12); }
+.btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+}
+.btn:hover { border-color: var(--orange-400); }
+.btn-primary { background: var(--primary-button) !important; color: #FFF6DD !important; }
+.perk-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--glass-border);
+}
+.perk-card.ready { border-color: rgba(232,198,106,0.6); }
+.perk-card.active-perk { border-color: var(--gold-400); box-shadow: 0 0 14px var(--gold-glow); }
+.perk-name, .perk-desc { color: var(--text-primary); }
+.perk-desc { color: var(--text-secondary); }
+.help-card { background: rgba(255,255,255,0.05); border-color: var(--glass-border); }
+.help-card h4 { color: var(--orange-400); }
+.help-card p, .help-card li { color: var(--text-secondary); }
+.help-subtitle, .panel-title, .move-history { font-family: 'Inter', system-ui, sans-serif; }
+
+/* ── Primary NEW GAME button ── */
+.btn-new-game {
+  width: min(100%, 560px);
+  height: 56px;
+  border-radius: 28px;
+  border: 1px solid rgba(232, 198, 106, 0.65);
+  background: var(--primary-button);
+  color: #FFF6DD;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform 120ms ease, filter var(--transition);
+}
+.btn-new-game:hover { filter: brightness(1.12); }
+.btn-new-game:active { transform: scale(0.98); }
+
+/* ── Layout ── */
+.board-container { gap: 14px; width: min(100%, 620px); }
+.side-panel .panel { margin-bottom: 12px; }
+body.super-mode .turn-badge { box-shadow: var(--shadow-card), 0 0 18px rgba(232,198,106,0.25); }
+
+/* ── Small screens ── */
+@media (max-width: 560px) {
+  .player-cards, .trays { flex-direction: row; }
+  .side-panel { width: 100%; }
+  .main { padding: 8px 12px 20px; }
+  .board-wrapper { padding: 8px 8px 26px 26px; }
+  .board { width: min(calc(100vw - 70px), 500px); }
+  .piece { font-size: clamp(20px, 7.4vw, 42px); }
+}
+@media (max-width: 380px) {
+  .player-cards { flex-direction: column; }
+  .trays { flex-direction: column; }
+  .seg-btn { font-size: 10px; letter-spacing: 0.8px; }
+}
+
+/* ── Reduce Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .piece { transition: none; }
+  .square.selected .piece { transform: scale(1.04); filter: none; }
+  .env { transition: none; }
+  .square.hint-empty::before, .square.hint-capture::before { animation: none; }
+}
 
 </style>
 </head>
-<body>
+<body data-theme="day">
+<div class="env env-day" aria-hidden="true"></div>
+<div class="env env-night" aria-hidden="true"></div>
+<div class="scene-scrim" aria-hidden="true"></div>
 <div class="title-banner">
     <div class="brand">
-      <div class="game-title">Soopor Chess</div>
-      <div class="version-tag">v1.0.6</div>
-      <div class="brand-mark" aria-hidden="true">
-        <span class="brand-king">♔</span><span class="brand-letters">SC</span>
+      <div class="brand-row">
+        <span class="brand-king-badge" aria-hidden="true">♚</span>
+        <div class="brand-text">
+          <div class="game-title">Soopor Chess</div>
+          <div class="version-tag">Parklight Edition • v1.1.9</div>
+        </div>
       </div>
     </div>
     <div class="top-actions">
+      <button class="icon-btn" id="btnTheme" title="Theme: Auto (tap to change)">🌓</button>
       <button class="icon-btn" id="btnTutorial" title="Learn to play">🎓</button>
       <button class="icon-btn" id="btnHelp" title="Help / info">?</button>
-      <button class="icon-btn" id="btnMode" title="Switch PvP / PvC">PVP</button>
     </div>
   </div>
-  <div class="turn-badge" id="turnIndicator">
+  <div class="turn-badge" id="turnIndicator" role="status">
     <span class="turn-dot"></span>
-    <span id="turnText">Orange's Turn</span>
+    <span id="turnText">Blue to Move</span>
   </div>
-  <div class="super-toggle">
-    <span class="super-label" id="superLabel">CLASSIC</span>
-    <div class="super-switch" id="superSwitch" title="Toggle SUPER mode"></div>
-    <span class="super-label" id="superLabelR">SUPER</span>
-  </div>
-  <div class="difficulty-bar" id="difficultyBar" hidden>
-    <span class="diff-prefix">CPU LEVEL</span>
-    <div class="diff-seg">
-      <button class="diff-btn active" data-diff="beginner">Beginner</button>
-      <button class="diff-btn" data-diff="intermediate">Intermediate</button>
-      <button class="diff-btn" data-diff="pro">Pro</button>
-      <button class="diff-btn" data-diff="expert">Expert</button>
+  <div class="match-wrap">
+    <div class="match-controls">
+      <button class="seg-btn seg-active" id="segClassic">Classic</button>
+      <button class="seg-btn" id="segSuper">Super</button>
+      <button class="seg-btn seg-opponent" id="segOpponent" title="Choose opponent">CPU • Beginner</button>
     </div>
-    <span class="diff-hint" id="difficultyHint">Casual play — beatable with basic strategy</span>
+    <div class="opponent-sheet" id="opponentSheet" hidden>
+      <button data-opp="pvp">PvP — Player vs Player</button>
+      <button data-opp="beginner">CPU • Beginner</button>
+      <button data-opp="intermediate">CPU • Intermediate</button>
+      <button data-opp="pro">CPU • Pro</button>
+      <button data-opp="expert">CPU • Expert</button>
+    </div>
+  </div>
+  <div id="legacyControls" hidden>
+    <button class="icon-btn" id="btnMode" title="Switch PvP / CvP">PVP</button>
+    <div class="super-toggle">
+      <span class="super-label" id="superLabel">CLASSIC</span>
+      <div class="super-switch" id="superSwitch" title="Toggle SUPER mode"></div>
+      <span class="super-label" id="superLabelR">SUPER</span>
+    </div>
+    <div class="difficulty-bar" id="difficultyBar" hidden>
+      <span class="diff-prefix">COMPUTER LEVEL</span>
+      <div class="diff-seg">
+        <button class="diff-btn active" data-diff="beginner">Beginner</button>
+        <button class="diff-btn" data-diff="intermediate">Intermediate</button>
+        <button class="diff-btn" data-diff="pro">Pro</button>
+        <button class="diff-btn" data-diff="expert">Expert</button>
+      </div>
+      <span class="diff-hint" id="difficultyHint">Casual play — beatable with basic strategy</span>
+    </div>
   </div>
 
 <!-- Help Drawer -->
@@ -1297,7 +1772,7 @@ body {
     <div class="help-head">
       <div>
         <div class="panel-title" style="margin:0;padding:0;border:none">Help / Info</div>
-        <div class="help-subtitle">Classic, Super, PvP, PvC, and perks</div>
+        <div class="help-subtitle">Classic, Super, PvP, CvP, and perks</div>
       </div>
       <button class="icon-btn" id="btnHelpClose" title="Close help">×</button>
     </div>
@@ -1305,7 +1780,7 @@ body {
       <section class="help-card">
         <h4>Game Modes</h4>
         <p><b>Classic</b> is standard chess. <b>Super</b> reveals the perk system.</p>
-        <p><b>PvP</b> is player-vs-player. <b>PvC</b> lets you play against the computer.</p>
+        <p><b>PvP</b> is player-vs-player. <b>CvP</b> lets you play against the computer.</p>
       </section>
       <section class="help-card">
         <h4>Perks</h4>
@@ -1335,17 +1810,36 @@ body {
       <div class="board" id="board"></div>
       <div class="file-labels" id="fileLabels"></div>
     </div>
+    <div class="player-cards">
+      <div class="player-card active-turn" id="cardBottom">
+        <span class="pc-avatar white-piece">♟︎</span>
+        <div class="pc-info">
+          <div class="pc-name" id="pcNameBottom">You • Blue</div>
+          <div class="pc-sub" id="pcSubBottom">Player 1</div>
+        </div>
+      </div>
+      <div class="player-card" id="cardTop">
+        <span class="pc-avatar black-piece">♟︎</span>
+        <div class="pc-info">
+          <div class="pc-name" id="pcNameTop">Navy</div>
+          <div class="pc-sub" id="pcSubTop">Player 2</div>
+        </div>
+      </div>
+    </div>
+    <div class="trays">
+      <div class="panel tray">
+        <div class="panel-title">Captured by Blue</div>
+        <div class="captured-row" id="capturedByWhite"></div>
+      </div>
+      <div class="panel tray">
+        <div class="panel-title">Captured by Navy</div>
+        <div class="captured-row" id="capturedByBlack"></div>
+      </div>
+    </div>
+    <button class="btn-new-game" id="btnNewGame">🌿 New Game</button>
   </div>
 
   <div class="side-panel">
-    <div class="panel">
-      <div class="panel-title">Captured by White</div>
-      <div class="captured-row" id="capturedByWhite"></div>
-    </div>
-    <div class="panel">
-      <div class="panel-title">Captured by Black</div>
-      <div class="captured-row" id="capturedByBlack"></div>
-    </div>
     <div class="panel">
       <div class="panel-title">Move History</div>
       <div class="move-history" id="moveHistory"></div>
@@ -1391,7 +1885,7 @@ body {
 <div class="modal-overlay" id="gameOverOverlay">
   <div class="modal-box gameover-box" id="gameOverBox">
     <h2 id="gameOverTitle">Checkmate</h2>
-    <p id="gameOverMessage">Orange wins!</p>
+    <p id="gameOverMessage">Blue wins!</p>
     <button class="btn" id="btnPlayAgain">Play Again</button>
   </div>
 </div>
@@ -1399,7 +1893,7 @@ body {
 <!-- Welcome Modal (first load) -->
 <div class="modal-overlay" id="welcomeOverlay">
   <div class="modal-box welcome-box">
-    <h2>⟨ Welcome to Soopor Chess ⟩</h2>
+    <h2>Welcome to Soopor Chess</h2>
     <p class="welcome-sub">New to chess? No problem. Pick a guided tutorial and you'll learn every piece,
       then win your very first game. Already a pro? Jump straight in.</p>
     <div class="welcome-actions">
@@ -1543,7 +2037,7 @@ class PerkSystem {
  * PIECE_CHARS — CRITICAL: DO NOT MODIFY THE ︎ CHARACTERS
  * ─────────────────────────────────────────────────────────
  * Both sides use the same filled Unicode chess glyphs (♚♛♜♝♞♟).
- * CSS `color` on .white-piece / .black-piece distinguishes orange vs blue.
+ * CSS `color` on .white-piece / .black-piece distinguishes blue vs navy.
  *
  * Every glyph is followed by U+FE0E (VARIATION SELECTOR-15, shown as ︎).
  * This forces TEXT presentation instead of EMOJI presentation.
@@ -1579,6 +2073,7 @@ let scanTimeout = null;
 let doubleTurnState = null;
 let recallArmed = false;
 let sprintArmed = false;
+let sprintArmedFor = null; // which side armed Pawn Sprint — perk persists until a pawn actually moves 4 squares
 let tripleAdvanceArmed = false;
 let overclockKnight = null;
 let glitchFirst = null;
@@ -1631,7 +2126,7 @@ const difficultyBar = document.getElementById('difficultyBar');
 const difficultyHint = document.getElementById('difficultyHint');
 
 function syncModeUI() {
-  btnMode.textContent = playMode === 'pvc' ? 'CPU' : 'PVP';
+  btnMode.textContent = playMode === 'pvc' ? 'CVP' : 'PVP';
   btnMode.classList.toggle('active', playMode === 'pvc');
   if (difficultyBar) difficultyBar.hidden = playMode !== 'pvc';
   if (playMode === 'pvc') syncDifficultyUI();
@@ -2125,7 +2620,8 @@ function updatePerkGrid() {
     if (!perk) return;
 
     const ready = perkIsReady(turn, perk);
-    const isActive = activePerk === perkId;
+    const isActive = activePerk === perkId ||
+      (perkId === 'pawn-sprint' && sprintArmed && sprintArmedFor === turn);
     // A setup-only perk whose window closed (without being used) reads
     // "EXPIRED" rather than the misleading "USED".
     const expired = perk.id === 'triple-advance' && !ready && perkSystem.canUse(turn, perk);
@@ -2137,13 +2633,19 @@ function updatePerkGrid() {
 
     const fill = card.querySelector('.perk-charge-fill');
     const text = card.querySelector('.perk-charge-text');
-    if (fill) fill.style.width = ready ? '100%' : '0%';
-    if (text) text.textContent = ready ? 'READY' : (expired ? 'EXPIRED' : 'USED');
+    if (fill) fill.style.width = (ready || (perkId === 'pawn-sprint' && sprintArmed)) ? '100%' : '0%';
+    if (text) text.textContent = isActive && perkId === 'pawn-sprint' ? 'ARMED' : (ready ? 'READY' : (expired ? 'EXPIRED' : 'USED'));
   });
 
   const hint = document.getElementById('perkHint');
   if (hint) {
-    if (activePerk) {
+    if (sprintArmed && sprintArmedFor === turn && !activePerk) {
+      hint.textContent = 'Pawn Sprint armed — select any pawn on its start row, then tap the gold square 4 ahead';
+      hint.style.color = 'var(--gold)';
+    } else if (sprintArmed && sprintArmedFor !== turn && !activePerk) {
+      hint.textContent = 'Six one-time perks per side';
+      hint.style.color = '';
+    } else if (activePerk) {
       const perk = PERKS.find(p => p.id === activePerk);
       hint.textContent = `Select a target for ${perk?.name || activePerk}...`;
       hint.style.color = 'var(--cyan)';
@@ -2266,8 +2768,11 @@ function onPerkClick(perkId) {
   }
 
   if (perkId === 'pawn-sprint') {
-    if (!perkSystem.use(turn, perk)) return;
+    if (!perkSystem.canUse(turn, perk)) return;
+    // Arm only — the perk is consumed when a pawn actually makes the 4-square move.
+    // Until then it stays armed for this side, even across turns.
     sprintArmed = true;
+    sprintArmedFor = turn;
     activePerk = null;
     updatePerkGrid();
     render();
@@ -2289,6 +2794,7 @@ function cancelPerk() {
   doubleTurnState = null;
   perkTargets = [];
   sprintArmed = false;
+  sprintArmedFor = null;
   tripleAdvanceArmed = false;
   selectedSquare = null;
   updatePerkGrid();
@@ -2302,7 +2808,8 @@ function render() {
   const board = engine.getBoard();
   const turn = engine.getTurn();
 
-  turnTextEl.textContent = turn === 'white' ? "Orange's Turn" : "Blue's Turn";
+  turnTextEl.textContent = turn === 'white' ? "Blue to Move" : "Navy to Move";
+  if (typeof syncMatchControls === 'function') syncMatchControls();
   turnIndicatorEl.className = `turn-badge ${turn === 'white' ? 'white-turn' : 'black-turn'}`;
 
   let checkKingSq = null;
@@ -2337,6 +2844,32 @@ function render() {
       if (activePerk && perkTargets.some(t => t[0] === r && t[1] === c))
         sq.classList.add('perk-target');
 
+      // Pawn Sprint: highlight eligible pawns (or the 4-square destination of the selected pawn)
+      if (sprintArmed && sprintArmedFor === turn && !activePerk) {
+        const startRow = turn === 'white' ? 6 : 1;
+        if (selectedSquare && selectedSquare[0] === r && selectedSquare[1] === c &&
+            piece && piece.toLowerCase() === 'p' && r === startRow) {
+          sq.classList.add('sprint-eligible');
+        }
+        if (selectedSquare && selectedSquare[0] === startRow) {
+          const sp = board[selectedSquare[0]][selectedSquare[1]];
+          if (sp && sp.toLowerCase() === 'p') {
+            const dir = turn === 'white' ? -1 : 1;
+            const tRow = selectedSquare[0] + dir * 4;
+            if (r === tRow && c === selectedSquare[1] &&
+                [1,2,3,4].every(step => !board[selectedSquare[0] + dir * step][selectedSquare[1]])) {
+              sq.classList.add('perk-target');
+            }
+          }
+        } else if (!selectedSquare && piece && piece.toLowerCase() === 'p' && r === startRow &&
+                   isPieceColor(piece, turn)) {
+          const dir = turn === 'white' ? -1 : 1;
+          if ([1,2,3,4].every(step => engine._inBounds(r + dir * step, c) && !board[r + dir * step][c])) {
+            sq.classList.add('sprint-eligible');
+          }
+        }
+      }
+
       // Scan highlight
       if (scanHighlight && scanHighlight.some(t => t[0] === r && t[1] === c))
         sq.classList.add('scan-highlight');
@@ -2367,14 +2900,25 @@ function renderCaptured() {
   capturedByWhiteEl.innerHTML = '';
   capturedByBlackEl.innerHTML = '';
   const sortFn = (a, b) => (PIECE_VALUES[b.toLowerCase()] || 0) - (PIECE_VALUES[a.toLowerCase()] || 0);
-  const addCap = (p, el) => {
-    const span = document.createElement('span');
-    span.classList.add('cap-piece', p === p.toUpperCase() ? 'white-piece' : 'black-piece');
-    span.textContent = PIECE_CHARS[p];
-    el.appendChild(span);
+  const addGroup = (pieces, el) => {
+    // Group identical pieces; show a ×n multiplier for 2+ copies.
+    const counts = new Map();
+    [...pieces].sort(sortFn).forEach(p => counts.set(p, (counts.get(p) || 0) + 1));
+    for (const [p, n] of counts) {
+      const span = document.createElement('span');
+      span.classList.add('cap-piece', p === p.toUpperCase() ? 'white-piece' : 'black-piece');
+      span.textContent = PIECE_CHARS[p];
+      el.appendChild(span);
+      if (n > 1) {
+        const mult = document.createElement('i');
+        mult.classList.add('cap-count');
+        mult.textContent = `×${n}`;
+        el.appendChild(mult);
+      }
+    }
   };
-  [...capturedByWhite].sort(sortFn).forEach(p => addCap(p, capturedByWhiteEl));
-  [...capturedByBlack].sort(sortFn).forEach(p => addCap(p, capturedByBlackEl));
+  addGroup(capturedByWhite, capturedByWhiteEl);
+  addGroup(capturedByBlack, capturedByBlackEl);
 }
 
 function renderMoveHistory() {
@@ -2437,7 +2981,7 @@ function onSquareClick(row, col) {
     return;
   }
 
-  if (sprintArmed && selectedSquare) {
+  if (sprintArmed && sprintArmedFor === turn && selectedSquare) {
     const from = selectedSquare;
     const selectedPiece = board[from[0]][from[1]];
     const startRow = turn === 'white' ? 6 : 1;
@@ -2451,13 +2995,18 @@ function onSquareClick(row, col) {
         });
         if (!pathClear) return;
         const ok = executeMove({ from: [...from], to: sprintTo });
-        if (ok) sprintArmed = false;
+        if (ok) {
+          // Only now is the one-time perk consumed.
+          const sprintPerk = PERKS.find(p => p.id === 'pawn-sprint');
+          if (sprintPerk) perkSystem.use(turn, sprintPerk);
+          sprintArmed = false;
+          sprintArmedFor = null;
+        }
         return;
       }
     }
+    // Clicking anywhere else keeps the perk armed — it waits for the 4-square pawn move.
   }
-
-  if (sprintArmed && !selectedSquare) sprintArmed = false;
 
   if (tripleAdvanceArmed && selectedSquare) {
     const from = selectedSquare;
@@ -2486,7 +3035,8 @@ function onSquareClick(row, col) {
     if (moveMatch) {
       const sourceSquare = [...selectedSquare];
       const didMove = executeMove({ from: sourceSquare, to: [row, col], promotionPiece: moveMatch.promotionPiece });
-      if (didMove && sprintArmed) sprintArmed = false;
+      // Pawn Sprint stays armed if the player makes a normal move instead —
+      // it waits until a pawn is moved 4 squares (once per game).
       if (didMove && tripleAdvanceArmed) tripleAdvanceArmed = false;
       return;
     }
@@ -2666,7 +3216,7 @@ function executeMove(move, options = {}) {
     gameOver = true;
     // `turn` is the side that has been mated — the loser.
     finalizeExpertGame(turn === computerColor);
-    showGameOver('checkmate', turn === 'white' ? 'Blue' : 'Orange');
+    showGameOver('checkmate', turn === 'white' ? 'Navy' : 'Blue');
   } else if (engine.isStalemate(turn)) {
     gameOver = true;
     finalizeExpertGame(false);
@@ -2757,11 +3307,12 @@ document.getElementById('btnResign').addEventListener('click', () => {
   gameOver = true;
   // The side to move resigns; if that's the human vs Expert, the CPU "wins".
   finalizeExpertGame(false);
-  showGameOver('resign', engine.getTurn() === 'white' ? 'Blue' : 'Orange');
+  showGameOver('resign', engine.getTurn() === 'white' ? 'Navy' : 'Blue');
 });
 document.getElementById('btnPlayAgain').addEventListener('click', newGame);
 
 function newGame() {
+  if (typeof applySessionTheme === 'function') applySessionTheme();
   engine = new ChessEngine();
   selectedSquare = null;
   legalMoves = [];
@@ -2774,6 +3325,7 @@ function newGame() {
   doubleTurnState = null;
   perkTargets = [];
   sprintArmed = false;
+  sprintArmedFor = null;
   tripleAdvanceArmed = false;
   recallArmed = false;
   overclockKnight = null;
@@ -2851,7 +3403,7 @@ function tutSetupBoard(map, turn) {
   if (engine._recordPosition) engine._recordPosition();
   selectedSquare = null; legalMoves = []; lastMove = null;
   capturedByWhite = []; capturedByBlack = []; pendingPromo = null; gameOver = false;
-  activePerk = null; doubleTurnState = null; perkTargets = []; sprintArmed = false;
+  activePerk = null; doubleTurnState = null; perkTargets = []; sprintArmed = false; sprintArmedFor = null;
   tripleAdvanceArmed = false;
   shieldedSquare = null; shieldExpirePly = 0; scanHighlight = null;
   if (scanTimeout) clearTimeout(scanTimeout);
@@ -3213,6 +3765,97 @@ document.getElementById('btnTutorial').addEventListener('click', () => {
   if (Tutorial.active) { Tutorial.exit(); newGame(); return; }
   welcomeOverlay.classList.add('active');
 });
+
+/* ═══════════════════════════════════════════
+   PARKLIGHT EDITION — theme, match controls, player cards
+   ═══════════════════════════════════════════ */
+const segClassic = document.getElementById('segClassic');
+const segSuper = document.getElementById('segSuper');
+const segOpponent = document.getElementById('segOpponent');
+const opponentSheet = document.getElementById('opponentSheet');
+const btnTheme = document.getElementById('btnTheme');
+const btnNewGame = document.getElementById('btnNewGame');
+const cardBottom = document.getElementById('cardBottom');
+const cardTop = document.getElementById('cardTop');
+
+function diffLabel() { return difficulty.charAt(0).toUpperCase() + difficulty.slice(1); }
+
+/* Theme: Auto/Day/Night setting; session theme locked for the match */
+let themeSetting = 'auto';
+try { themeSetting = localStorage.getItem('parklight-theme') || 'auto'; } catch (e) {}
+function computeSessionTheme() {
+  if (themeSetting === 'day' || themeSetting === 'night') return themeSetting;
+  const h = new Date().getHours();
+  return (h >= 6 && h < 18) ? 'day' : 'night';
+}
+function applySessionTheme() {
+  document.body.dataset.theme = computeSessionTheme();
+}
+function syncThemeButton() {
+  btnTheme.textContent = themeSetting === 'day' ? '☀️' : themeSetting === 'night' ? '🌙' : '🌓';
+  btnTheme.title = `Theme: ${themeSetting.charAt(0).toUpperCase() + themeSetting.slice(1)} (tap to change)`;
+}
+btnTheme.addEventListener('click', () => {
+  themeSetting = themeSetting === 'auto' ? 'day' : themeSetting === 'day' ? 'night' : 'auto';
+  try { localStorage.setItem('parklight-theme', themeSetting); } catch (e) {}
+  syncThemeButton();
+  // Theme stays locked mid-match; re-evaluate only before the first move.
+  if (engine.getMoveHistory().length === 0) applySessionTheme();
+});
+
+/* Segmented mode control */
+segClassic.addEventListener('click', () => { if (superMode) superSwitch.click(); });
+segSuper.addEventListener('click', () => { if (!superMode) superSwitch.click(); });
+segOpponent.addEventListener('click', (e) => {
+  e.stopPropagation();
+  opponentSheet.hidden = !opponentSheet.hidden;
+});
+opponentSheet.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const v = btn.dataset.opp;
+    if (v === 'pvp') {
+      if (playMode === 'pvc') btnMode.click();
+    } else {
+      if (playMode !== 'pvc') btnMode.click();
+      const db = document.querySelector(`.diff-btn[data-diff="${v}"]`);
+      if (db) db.click();
+    }
+    opponentSheet.hidden = true;
+    syncMatchControls();
+  });
+});
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.match-wrap')) opponentSheet.hidden = true;
+});
+
+/* Player cards + segmented labels — called from render() */
+function syncMatchControls() {
+  segClassic.classList.toggle('seg-active', !superMode);
+  segSuper.classList.toggle('seg-active', superMode);
+  segOpponent.classList.toggle('seg-active', false);
+  segOpponent.textContent = playMode === 'pvc' ? `CPU • ${diffLabel()}` : 'PvP';
+
+  const turn = engine.getTurn();
+  cardBottom.classList.toggle('active-turn', turn === 'white' && !gameOver);
+  cardTop.classList.toggle('active-turn', turn === 'black' && !gameOver);
+  document.getElementById('pcNameBottom').textContent = playMode === 'pvc' ? 'You • Blue' : 'Player 1 • Blue';
+  document.getElementById('pcSubBottom').textContent = playMode === 'pvc' ? 'Human' : 'Human';
+  document.getElementById('pcNameTop').textContent = playMode === 'pvc' ? 'CPU • Navy' : 'Player 2 • Navy';
+  document.getElementById('pcSubTop').textContent = playMode === 'pvc' ? diffLabel() : 'Human';
+}
+
+/* Primary NEW GAME with confirm when a match is active */
+btnNewGame.addEventListener('click', () => {
+  if (engine.getMoveHistory().length > 0 && !gameOver) {
+    if (!confirm('Start a new game? Your current match will be lost.')) return;
+  }
+  newGame();
+  applySessionTheme();
+});
+
+syncThemeButton();
+applySessionTheme();
+syncMatchControls();
 
 /* ── Init ── */
 if (!window.__inited) {
